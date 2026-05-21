@@ -446,6 +446,41 @@ const VARIANTES = [
   'salvedades en el informe',
 ];
 
+
+// ── PERSISTENCIA localStorage ──
+const SAVE_KEY = 'roac_progress';
+
+function saveProgress() {
+  const data = {
+    topicStats: S.topicStats,
+    sessionQ: S.sessionQ,
+    sessionOk: S.sessionOk,
+    modesLog: S.modesLog,
+  };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.topicStats) S.topicStats = data.topicStats;
+    if (data.sessionQ) S.sessionQ = data.sessionQ;
+    if (data.sessionOk) S.sessionOk = data.sessionOk;
+    if (data.modesLog) S.modesLog = data.modesLog;
+  } catch(e) {}
+}
+
+function resetProgress() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+  S.topicStats = Object.fromEntries(TOPICS.map(t=>[t.id,{correct:0,total:0}]));
+  S.sessionQ = 0; S.sessionOk = 0; S.modesLog = [];
+  loadProgress();
+renderHome();
+  alert('Progreso reiniciado');
+}
+
 let S = {
   topic: null, mode: null,
   sessionQ: 0, sessionOk: 0,

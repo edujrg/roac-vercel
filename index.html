@@ -810,7 +810,7 @@ async function initErr(){
   const topic = TOPICS.find(t=>t.id===S.topic);
   document.getElementById('err-body').innerHTML=`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando extracto con errores…</div></div>`;
   try {
-    const raw = await callAI(`Genera extracto de informe auditoría sobre "${topic?.full}" con exactamente 4 errores técnicos sutiles y realistas (terminología incorrecta, artículos equivocados, criterios erróneos, omisiones normativas). Típicos de candidatos ROAC que suspenden.
+    const raw = await callAI(`Genera extracto de informe de auditoría sobre "${topic?.full}" con exactamente 4 errores técnicos sutiles y realistas (terminología incorrecta, artículos equivocados, criterios erróneos, omisiones normativas). Típicos de candidatos ROAC que suspenden.
 IMPORTANTE: "texto_erroneo" debe ser frase literal de los párrafos.
 JSON: {"titulo":"Extracto de [tipo]","parrafos":["párrafo 1","párrafo 2","párrafo 3"],"errores":[{"texto_erroneo":"frase literal","explicacion":"Por qué es incorrecto y norma correcta.","referencia":"NIA-ES X / Art.Y LAC"},{"texto_erroneo":"...","explicacion":"...","referencia":"..."},{"texto_erroneo":"...","explicacion":"...","referencia":"..."},{"texto_erroneo":"...","explicacion":"...","referencia":"..."}]}`);
     const doc = JSON.parse(raw.replace(/```json|```/g,'').trim());

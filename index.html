@@ -552,7 +552,7 @@ async function callAI(prompt, sys){
   const r = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': key },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: sys||SYS_ROAC, messages: [{role:'user',content:prompt}] })
+    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1200, system: sys||SYS_ROAC, messages: [{role:'user',content:prompt}] })
   });
   if(!r.ok){ const e = await r.json(); throw new Error(e.error?.message || 'HTTP '+r.status); }
   const d = await r.json();
@@ -566,7 +566,7 @@ async function callChat(messages, sys){
   const r = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': key },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, system: sys, messages })
+    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, system: sys, messages })
   });
   if(!r.ok){ const e = await r.json(); throw new Error(e.error?.message || 'HTTP '+r.status); }
   const d = await r.json();

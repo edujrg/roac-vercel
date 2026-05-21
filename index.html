@@ -464,7 +464,7 @@ function loadProgress() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return;
-    const data = JSON.parse(raw);
+    const data = JSON.parse(raw.replace(/```json|```/g,'').trim());
     if (data.topicStats) S.topicStats = data.topicStats;
     if (data.sessionQ) S.sessionQ = data.sessionQ;
     if (data.sessionOk) S.sessionOk = data.sessionOk;
@@ -636,7 +636,7 @@ JSON: {"tipo":"caso","normativa":"NIA-ES X / Art.Z LAC","caso":"Descripción det
 
   try {
     const raw = await callAI(prompts[S.mode] || prompts.test);
-    renderQ(JSON.parse(raw));
+    renderQ(JSON.parse(raw.replace(/```json|```/g,'').trim()));
   } catch(e) {
     document.getElementById('q-body').innerHTML = `<div class="loading-wrap"><div style="font-size:32px">⚠️</div><div class="loading-text">Error: ${e.message}<br><br>Pulsa reintentar.</div></div>`;
     btn.textContent = 'Reintentar'; btn.disabled = false; S.awaitNext = true;
@@ -712,7 +712,7 @@ async function confirmOpen(q){
   document.getElementById('fb-area').innerHTML = `<div class="fb-panel"><div class="loading-wrap" style="padding:14px 0"><div class="spinner"></div><div class="loading-text">Evaluando tu respuesta…</div></div></div>`;
   try {
     const raw = await callAI(`Evalúa respuesta ROAC.\nPregunta:${q.pregunta}\nModelo:${q.respuesta_modelo}\nPuntos clave:${q.puntos_clave?.join(', ')}\nCandidato:${ans}\nJSON:{"correcta":true/false,"puntuacion":0-10,"feedback":"feedback técnico detallado","puntos_logrados":["..."],"puntos_faltantes":["..."],"referencia":"..."}`);
-    const ev = JSON.parse(raw);
+    const ev = JSON.parse(raw.replace(/```json|```/g,'').trim());
     const ok = ev.puntuacion >= 6;
     recordResult(ok);
     let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ev.puntuacion}/10 — ${ok?'Suficiente':'Mejorable'}</span></div><div class="fb-text">${ev.feedback}</div>`;
@@ -751,7 +751,7 @@ async function initFC(){
     const raw = await callAI(`Genera exactamente ${n} flashcards ROAC sobre "${topic?.full}". Varía el tipo: definiciones NIA-ES, artículos LAC, tipos de opinión, criterios independencia, procedimientos, plazos legales.
 Array JSON: [{"frente":"Pregunta concisa","reverso":"Explicación técnica precisa","normativa":"NIA-ES X / Art.Y LAC"}]
 Solo el array, sin nada más.`);
-    S.fcCards = JSON.parse(raw);
+    S.fcCards = JSON.parse(raw.replace(/```json|```/g,'').trim());
     S.fcQueue = S.fcCards.map((_,i)=>i);
     renderFC();
     S.modesLog.push('Flashcards — '+topic?.full);
@@ -813,7 +813,7 @@ async function initErr(){
     const raw = await callAI(`Genera extracto de informe auditoría sobre "${topic?.full}" con exactamente 4 errores técnicos sutiles y realistas (terminología incorrecta, artículos equivocados, criterios erróneos, omisiones normativas). Típicos de candidatos ROAC que suspenden.
 IMPORTANTE: "texto_erroneo" debe ser frase literal de los párrafos.
 JSON: {"titulo":"Extracto de [tipo]","parrafos":["párrafo 1","párrafo 2","párrafo 3"],"errores":[{"texto_erroneo":"frase literal","explicacion":"Por qué es incorrecto y norma correcta.","referencia":"NIA-ES X / Art.Y LAC"},{"texto_erroneo":"...","explicacion":"...","referencia":"..."},{"texto_erroneo":"...","explicacion":"...","referencia":"..."},{"texto_erroneo":"...","explicacion":"...","referencia":"..."}]}`);
-    const doc = JSON.parse(raw);
+    const doc = JSON.parse(raw.replace(/```json|```/g,'').trim());
     S.errErrors = doc.errores;
     renderErrDoc(doc);
     S.modesLog.push('Detectar errores — '+topic?.full);
@@ -876,7 +876,7 @@ async function initDebate(){
   try {
     const raw = await callAI(`Genera postura técnica INCORRECTA sobre "${topic?.full}" para debate ROAC. Plausible pero errónea, rebatible con normativa.
 JSON: {"postura":"2-3 frases en primera persona defendiendo la postura incorrecta","tema":"Título corto (máx 5 palabras)","pista":"Solo la referencia normativa que la desmonta"}`);
-    const deb = JSON.parse(raw);
+    const deb = JSON.parse(raw.replace(/```json|```/g,'').trim());
     window._deb = deb;
     document.querySelector('#deb-chat .msg.sys')?.remove();
     addMsg('deb-chat','sys',`Debate: ${deb.tema}`);
@@ -923,7 +923,7 @@ async function initRoles(){
   try {
     const raw = await callAI(`Genera escenario juego de roles ROAC sobre "${topic?.full}". Alumno es auditor senior.
 JSON: {"empresa":"Nombre y sector","situacion":"Situación problemática concreta, 2 frases","primer_mensaje":"Mensaje inicial del director financiero al auditor, natural, 2-3 frases"}`);
-    const sc = JSON.parse(raw);
+    const sc = JSON.parse(raw.replace(/```json|```/g,'').trim());
     window._sc = sc;
     document.querySelector('#roles-chat .msg.sys')?.remove();
     addMsg('roles-chat','sys',`Empresa: ${sc.empresa}`);

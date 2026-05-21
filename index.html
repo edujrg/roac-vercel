@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Academia ROAC 2026</title>
+<style>
+  :root {
+    --rp: #185FA5; --rpl: #E6F1FB; --rp8: #0C447C;
+    --ra: #0F6E56; --ral: #E1F5EE;
+    --rw: #BA7517; --rwl: #FAEEDA;
+    --rd: #A32D2D; --rdl: #FCEBEB;
+    --rs: #3B6D11; --rsl: #EAF3DE;
+    --rv: #533AB7; --rvl: #EEEDFE;
+    --bg: #F5F4F0; --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+    --text: #1a1a1a; --text2: #5a5a5a; --text3: #888;
+    --radius: 10px; --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141414; --surface: #1e1e1e;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+      --text: #f0f0f0; --text2: #a0a0a0; --text3: #666;
+      --rpl: #0a2a47; --ral: #052e22; --rwl: #2e1e05;
+      --rdl: #2e0a0a; --rsl: #0f2205; --rvl: #1a1040;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+  .screen { display: none; flex-direction: column; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* TOPBAR */
+  .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; }
+  .logo { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: var(--rp); background: var(--rpl); padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--text); flex: 1; }
+  .icon-btn { background: none; border: 0.5px solid var(--border2); border-radius: 8px; padding: 7px 10px; font-size: 13px; color: var(--text2); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+  /* HERO */
+  .hero { background: var(--surface); padding: 16px; border-bottom: 0.5px solid var(--border); }
+  .hero-greeting { font-size: 13px; color: var(--text3); margin-bottom: 2px; }
+  .hero-title { font-size: 21px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .time-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .time-btn { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 6px; cursor: pointer; text-align: center; transition: all .15s; }
+  .time-btn.sel { border-color: var(--rp); background: var(--rpl); }
+  .time-btn .tm { font-size: 16px; font-weight: 700; color: var(--text); }
+  .time-btn .tl { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+  /* SECTION LABEL */
+  .slabel { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); padding: 14px 16px 8px; }
+
+  /* TOPIC CARDS */
+  .topic-list { padding: 0 16px 8px; display: flex; flex-direction: column; gap: 8px; }
+  .topic-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: border-color .15s; }
+  .topic-card:active { background: var(--bg); }
+  .topic-icon { width: 38px; height: 38px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .topic-info { flex: 1; min-width: 0; }
+  .topic-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .topic-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .topic-bar-wrap { height: 3px; background: var(--bg); border-radius: 2px; margin-top: 6px; }
+  .topic-bar { height: 3px; border-radius: 2px; transition: width .4s; }
+
+  /* CREATIVE MODE GRID */
+  .mode-grid { padding: 0 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .mode-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .mode-sm { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; transition: border-color .15s; }
+  .mode-sm:active { background: var(--bg); }
+  .mode-sm .mi { font-size: 26px; }
+  .mode-sm .mn { font-size: 13px; font-weight: 600; color: var(--text); }
+  .mode-sm .md { font-size: 11px; color: var(--text3); line-height: 1.4; }
+
+  /* BACK BTN */
+  .back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text3); padding: 12px 16px 4px; font-family: inherit; }
+
+  /* EXERCISE MODES */
+  .mode-full-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .mode-full { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: border-color .15s; }
+  .mode-full:active { background: var(--bg); }
+  .mode-full .mfi { font-size: 22px; width: 30px; text-align: center; flex-shrink: 0; }
+  .mode-full .mfinfo .mfn { font-size: 14px; font-weight: 600; color: var(--text); }
+  .mode-full .mfinfo .mfd { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* EX HEADER */
+  .ex-header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 10px 16px; position: sticky; top: 57px; z-index: 9; }
+  .ex-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .tag-blue { background: var(--rpl); color: var(--rp); }
+  .tag-gray { background: var(--bg); color: var(--text3); }
+  .tag-amber { background: var(--rwl); color: var(--rw); }
+  .tag-green { background: var(--ral); color: var(--ra); }
+  .ex-prog { display: flex; align-items: center; gap: 8px; }
+  .ex-prog-bar { flex: 1; height: 4px; background: var(--bg); border-radius: 2px; }
+  .ex-prog-fill { height: 4px; background: var(--rp); border-radius: 2px; transition: width .3s; }
+  .ex-count { font-size: 12px; color: var(--text3); white-space: nowrap; }
+
+  /* QUESTION */
+  .q-body { padding: 16px; flex: 1; }
+  .q-norm { font-size: 12px; color: var(--rp); background: var(--rpl); padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 12px; font-weight: 500; }
+  .q-text { font-size: 15px; line-height: 1.65; color: var(--text); margin-bottom: 16px; }
+  .q-box { background: var(--bg); border-radius: var(--radius); padding: 12px; margin-bottom: 14px; font-size: 13px; color: var(--text2); line-height: 1.65; border-left: 3px solid var(--border2); }
+  .options-list { display: flex; flex-direction: column; gap: 9px; }
+  .opt-btn { width: 100%; background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 13px 14px; text-align: left; font-size: 14px; color: var(--text); cursor: pointer; font-family: inherit; line-height: 1.5; display: flex; align-items: flex-start; gap: 10px; transition: all .15s; }
+  .opt-btn:active:not(:disabled) { background: var(--bg); }
+  .opt-btn.sel { border-color: var(--rp); background: var(--rpl); }
+  .opt-btn.correct { border-color: var(--rs); background: var(--rsl); }
+  .opt-btn.wrong { border-color: var(--rd); background: var(--rdl); }
+  .opt-letter { font-size: 11px; font-weight: 700; color: var(--text3); background: var(--bg); border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 1px; }
+  textarea.open-area { width: 100%; border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 13px 14px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); resize: vertical; min-height: 100px; line-height: 1.6; outline: none; }
+  textarea.open-area:focus { border-color: var(--rp); }
+
+  /* FEEDBACK */
+  .fb-panel { background: var(--surface); border-top: 0.5px solid var(--border); padding: 14px 16px; }
+  .fb-result { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+  .fb-icon { font-size: 22px; }
+  .fb-label { font-size: 15px; font-weight: 700; }
+  .fb-label.ok { color: var(--rs); }
+  .fb-label.ko { color: var(--rd); }
+  .fb-text { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 8px; }
+  .fb-ref { font-size: 12px; color: var(--rp); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .fb-point { font-size: 12px; margin-bottom: 4px; display: flex; align-items: flex-start; gap: 5px; }
+
+  /* ACTION AREA */
+  .action-area { padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 9px; background: var(--surface); border-top: 0.5px solid var(--border); }
+  .btn-primary { width: 100%; background: var(--rp); color: #B5D4F4; border: none; border-radius: var(--radius-lg); padding: 15px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: opacity .15s; }
+  .btn-primary:active { opacity: .85; }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-secondary { width: 100%; background: none; border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 13px; font-size: 14px; font-family: inherit; color: var(--text); cursor: pointer; }
+  .btn-secondary:active { background: var(--bg); }
+
+  /* LOADING */
+  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 16px; gap: 14px; }
+  .spinner { width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--rp); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text3); text-align: center; line-height: 1.5; }
+
+  /* API KEY SETUP */
+  .setup-wrap { padding: 24px 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  .setup-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .setup-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .setup-input { width: 100%; border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 13px 14px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; }
+  .setup-input:focus { border-color: var(--rp); }
+  .step-box { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
+  .step-box .step-num { font-size: 11px; font-weight: 700; color: var(--rp); background: var(--rpl); padding: 2px 7px; border-radius: 5px; display: inline-block; margin-bottom: 8px; }
+  .step-box p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .step-box a { color: var(--rp); }
+
+  /* FLASHCARDS */
+  .fc-pip-row { padding: 10px 16px 4px; display: flex; gap: 5px; flex-wrap: wrap; }
+  .fc-pip { width: 8px; height: 8px; border-radius: 50%; background: var(--bg); flex-shrink: 0; }
+  .fc-pip.done { background: var(--rp); }
+  .fc-pip.cur { background: var(--rp); outline: 2.5px solid var(--rpl); }
+  .fc-subtitle { padding: 2px 16px 8px; font-size: 12px; color: var(--text3); text-align: center; }
+  .fc-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 28px 20px; margin: 0 16px; min-height: 190px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: border-color .15s; }
+  .fc-card:active { background: var(--bg); }
+  .fc-front { font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .fc-hint { font-size: 12px; color: var(--text3); margin-top: 12px; }
+  .fc-back-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .fc-back { font-size: 14px; color: var(--text2); line-height: 1.65; }
+  .fc-norm { font-size: 11px; color: var(--rp); background: var(--rpl); padding: 3px 9px; border-radius: 5px; margin-bottom: 10px; display: inline-block; font-weight: 500; }
+  .fc-rate-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 14px; }
+  .fc-rate-btn { border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 11px 6px; cursor: pointer; background: var(--surface); font-family: inherit; font-size: 12px; text-align: center; line-height: 1.4; }
+  .fc-rate-btn:active { background: var(--bg); }
+  .hard { color: var(--rd); }
+  .med { color: var(--rw); }
+  .easy { color: var(--rs); }
+
+  /* CHAT */
+  .chat-area { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+  .msg { max-width: 90%; padding: 11px 14px; border-radius: var(--radius-lg); font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+  .msg.ai { background: var(--bg); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg.user { background: var(--rpl); color: var(--rp8); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg.sys { background: var(--rwl); color: var(--rw); align-self: center; font-size: 12px; text-align: center; border-radius: 8px; max-width: 96%; }
+  .chat-bottom { padding: 10px 16px 24px; display: flex; gap: 9px; background: var(--surface); border-top: 0.5px solid var(--border); }
+  .chat-inp { flex: 1; border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 11px 13px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; }
+  .chat-inp:focus { border-color: var(--rp); }
+  .chat-send { background: var(--rp); border: none; border-radius: var(--radius-lg); padding: 11px 15px; cursor: pointer; color: #B5D4F4; font-size: 17px; display: flex; align-items: center; flex-shrink: 0; }
+  .chat-send:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ERROR DETECTION */
+  .err-score { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 9px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text2); }
+  .err-score-val { font-size: 16px; font-weight: 700; color: var(--text); }
+  .err-doc { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); margin: 0 16px; padding: 16px; }
+  .err-doc p { font-size: 13px; line-height: 1.75; color: var(--text); margin-bottom: 10px; }
+  .err-doc p:last-child { margin-bottom: 0; }
+  .err-hl { background: #FEF3C7; color: #78350F; border-radius: 3px; padding: 0 2px; cursor: pointer; border-bottom: 2px solid #D97706; }
+  .err-hl.marked { background: var(--rdl); color: var(--rd); border-bottom-color: var(--rd); }
+  .err-hl.found { background: var(--rsl); color: var(--rs); border-bottom-color: var(--rs); }
+
+  /* STATS */
+  .stats-content { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .big-stat { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+  .big-stat-val { font-size: 30px; font-weight: 700; color: var(--text); }
+  .big-stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: .06em; }
+  .s-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; }
+  .s-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+  .tpl-row { margin-bottom: 10px; }
+  .tpl-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+  .tpl-name { color: var(--text); }
+  .tpl-pct { color: var(--text3); }
+  .tpl-track { height: 6px; background: var(--bg); border-radius: 3px; }
+  .tpl-fill { height: 6px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ API KEY SETUP ═══════════════════════════════ -->
+<div id="s-setup" class="screen active">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Configuración</span>
+  </div>
+  <div class="setup-wrap">
+    <div class="setup-title">Bienvenido a Academia ROAC</div>
+    <div class="setup-desc">Para que la IA genere preguntas únicas cada vez, necesitas introducir tu clave API de Anthropic. Se guarda solo en tu dispositivo.</div>
+
+    <div class="step-box">
+      <div class="step-num">Paso 1</div>
+      <p>Ve a <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a> e inicia sesión (o crea cuenta gratuita).</p>
+    </div>
+    <div class="step-box">
+      <div class="step-num">Paso 2</div>
+      <p>Pulsa "Create Key", ponle un nombre (ej. "ROAC App") y copia la clave que empieza por <strong>sk-ant-…</strong></p>
+    </div>
+    <div class="step-box">
+      <div class="step-num">Paso 3</div>
+      <p>Pégala aquí abajo y pulsa Guardar. Quedará guardada en este dispositivo.</p>
+    </div>
+
+    <input class="setup-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off" oninput="document.getElementById('save-key-btn').disabled=this.value.trim().length<10">
+    <button class="btn-primary" id="save-key-btn" disabled onclick="saveKey()">Guardar y empezar →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+<div id="s-home" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Academia Auditoría</span>
+    <button class="icon-btn" onclick="go('s-stats')">📊</button>
+    <button class="icon-btn" onclick="go('s-setup')" title="Cambiar API key">⚙️</button>
+  </div>
+  <div class="hero">
+    <div class="hero-greeting">Bienvenido de nuevo</div>
+    <div class="hero-title">¿Cuánto tiempo tienes?</div>
+    <div class="time-row">
+      <div class="time-btn" onclick="setTime(5,this)"><div class="tm">5 min</div><div class="tl">Rápido</div></div>
+      <div class="time-btn sel" onclick="setTime(20,this)"><div class="tm">20 min</div><div class="tl">Normal</div></div>
+      <div class="time-btn" onclick="setTime(60,this)"><div class="tm">60 min</div><div class="tl">Intensivo</div></div>
+    </div>
+  </div>
+  <div class="slabel">Ejercicios clásicos</div>
+  <div class="topic-list" id="topic-list"></div>
+  <div class="slabel">Aprendizaje activo</div>
+  <div class="mode-grid">
+    <div class="mode-row">
+      <div class="mode-sm" onclick="startCreative('flashcards')">
+        <div class="mi">🃏</div><div class="mn">Flashcards</div><div class="md">Repaso espaciado</div>
+      </div>
+      <div class="mode-sm" onclick="startCreative('errores')">
+        <div class="mi">🔍</div><div class="mn">Detectar errores</div><div class="md">Encuentra fallos</div>
+      </div>
+    </div>
+    <div class="mode-row">
+      <div class="mode-sm" onclick="startCreative('debate')">
+        <div class="mi">💬</div><div class="mn">Debate técnico</div><div class="md">Rebate a la IA</div>
+      </div>
+      <div class="mode-sm" onclick="startCreative('roles')">
+        <div class="mi">🕴️</div><div class="mn">Juego de roles</div><div class="md">Tú eres el auditor</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOPIC SELECT ═══════════════════════════════ -->
+<div id="s-topic" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title" id="ts-title">Bloque</span>
+  </div>
+  <button class="back-btn" onclick="go('s-home')">← Volver</button>
+  <div style="font-size:18px;font-weight:700;color:var(--text);padding:6px 16px 2px" id="ts-heading"></div>
+  <div style="font-size:13px;color:var(--text3);padding:0 16px 14px">Elige el tipo de ejercicio:</div>
+  <div class="mode-full-list">
+    <div class="mode-full" onclick="startClassic('test')">
+      <div class="mfi">📋</div>
+      <div class="mfinfo"><div class="mfn">Test opción múltiple</div><div class="mfd">4 opciones, lenguaje examen real</div></div>
+      <div style="color:var(--text3)">›</div>
+    </div>
+    <div class="mode-full" onclick="startClassic('desarrollo')">
+      <div class="mfi">✍️</div>
+      <div class="mfinfo"><div class="mfn">Pregunta de desarrollo</div><div class="mfd">Respuesta libre evaluada por IA</div></div>
+      <div style="color:var(--text3)">›</div>
+    </div>
+    <div class="mode-full" onclick="startClassic('caso')">
+      <div class="mfi">📁</div>
+      <div class="mfinfo"><div class="mfn">Caso práctico</div><div class="mfd">Supuesto real con análisis guiado</div></div>
+      <div style="color:var(--text3)">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ EXERCISE ═══════════════════════════════ -->
+<div id="s-exercise" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title" id="ex-title">—</span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="ex-header">
+    <div class="ex-meta">
+      <span class="tag tag-blue" id="ex-topic-tag">—</span>
+      <span class="tag tag-gray" id="ex-type-tag">—</span>
+    </div>
+    <div class="ex-prog">
+      <div class="ex-prog-bar"><div class="ex-prog-fill" id="ex-prog-fill" style="width:0%"></div></div>
+      <span class="ex-count" id="ex-count">0 ej.</span>
+    </div>
+  </div>
+  <div class="q-body" id="q-body">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando pregunta…</div></div>
+  </div>
+  <div id="fb-area"></div>
+  <div class="action-area">
+    <button class="btn-primary" id="ex-btn" disabled onclick="handleExBtn()">Confirmar respuesta</button>
+    <button class="btn-secondary" onclick="go('s-home')">Volver al inicio</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ FLASHCARDS ═══════════════════════════════ -->
+<div id="s-flashcards" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Flashcards</span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="fc-pip-row" id="fc-pips"></div>
+  <div class="fc-subtitle" id="fc-sub">Cargando…</div>
+  <div class="fc-card" id="fc-card" onclick="flipCard()">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando flashcards…</div></div>
+  </div>
+  <div id="fc-rate" style="display:none">
+    <div style="font-size:12px;color:var(--text3);text-align:center;padding:10px 0 6px">¿Cómo te ha resultado?</div>
+    <div class="fc-rate-row">
+      <div class="fc-rate-btn hard" onclick="rateCard('hard')">✕<br>Difícil<br><span style="font-size:10px">vuelve pronto</span></div>
+      <div class="fc-rate-btn med" onclick="rateCard('medium')">— <br>Regular<br><span style="font-size:10px">vuelve después</span></div>
+      <div class="fc-rate-btn easy" onclick="rateCard('easy')">✓<br>Dominado<br><span style="font-size:10px">al final</span></div>
+    </div>
+  </div>
+  <div class="action-area"><button class="btn-secondary" onclick="go('s-home')">Terminar sesión</button></div>
+</div>
+
+<!-- ═══════════════════════════════ ERROR DETECTION ═══════════════════════════════ -->
+<div id="s-errores" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Detectar errores</span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div id="err-score-bar" style="display:none" class="err-score">
+    <span>Errores marcados</span><span class="err-score-val" id="err-val">0/0</span>
+  </div>
+  <div class="q-body" id="err-body">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando extracto con errores…</div></div>
+  </div>
+  <div id="err-fb"></div>
+  <div class="action-area">
+    <button class="btn-primary" id="err-btn" disabled onclick="handleErrBtn()">Ver solución</button>
+    <button class="btn-secondary" onclick="go('s-home')">Volver al inicio</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DEBATE ═══════════════════════════════ -->
+<div id="s-debate" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Debate técnico</span>
+    <span class="tag tag-amber" id="deb-tag">—</span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="chat-area" id="deb-chat"></div>
+  <div class="chat-bottom">
+    <input class="chat-inp" id="deb-inp" placeholder="Tu argumento técnico…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendDebate();}">
+    <button class="chat-send" id="deb-send" onclick="sendDebate()" disabled>➤</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ ROLES ═══════════════════════════════ -->
+<div id="s-roles" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Juego de roles</span>
+    <span class="tag tag-green" id="roles-tag">—</span>
+    <button class="icon-btn" onclick="go('s-home')">✕</button>
+  </div>
+  <div class="chat-area" id="roles-chat"></div>
+  <div class="chat-bottom">
+    <input class="chat-inp" id="roles-inp" placeholder="Tu respuesta como auditor…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendRoles();}">
+    <button class="chat-send" id="roles-send" onclick="sendRoles()" disabled>➤</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ STATS ═══════════════════════════════ -->
+<div id="s-stats" class="screen">
+  <div class="topbar">
+    <span class="logo">ROAC 2026</span>
+    <span class="topbar-title">Mi progreso</span>
+    <button class="icon-btn" onclick="go('s-home')">← Inicio</button>
+  </div>
+  <div class="stats-content">
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="s-card">
+      <div class="s-card-title">Progreso por bloque</div>
+      <div id="topic-prog"></div>
+    </div>
+    <div class="s-card">
+      <div class="s-card-title">Actividad reciente</div>
+      <div id="modes-log" style="font-size:13px;color:var(--text3)">Sin actividad aún.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATOS
+// ══════════════════════════════════════════════════
+const TOPICS = [
+  {id:'nia',       name:'Normas NIA-ES',         full:'Normas de Auditoría (NIA-ES)',          icon:'📖', color:'#185FA5', bg:'#E6F1FB', bar:'#185FA5'},
+  {id:'independencia', name:'Independencia',     full:'Independencia y ética profesional',     icon:'🛡️', color:'#0F6E56', bg:'#E1F5EE', bar:'#0F6E56'},
+  {id:'informes',  name:'Informes',               full:'Informes de auditoría',                icon:'📄', color:'#BA7517', bg:'#FAEEDA', bar:'#BA7517'},
+  {id:'planificacion', name:'Planificación',      full:'Planificación y procedimientos',        icon:'📋', color:'#533AB7', bg:'#EEEDFE', bar:'#533AB7'},
+  {id:'control',   name:'Control interno',        full:'Control interno',                       icon:'🔒', color:'#993556', bg:'#FBEAF0', bar:'#993556'},
+];
+
+const VARIANTES = [
+  'caso real de pyme española',
+  'modificación normativa reciente',
+  'combinando dos NIA-ES',
+  'error típico de candidatos ROAC',
+  'criterio profesional del auditor',
+  'encargo en grupo de empresas',
+  'evidencia y suficiencia',
+  'comunicación con gobierno corporativo',
+  'hechos posteriores al cierre',
+  'salvedades en el informe',
+];
+
+let S = {
+  topic: null, mode: null,
+  sessionQ: 0, sessionOk: 0,
+  selOpt: null, awaitNext: false, loading: false,
+  topicStats: Object.fromEntries(TOPICS.map(t=>[t.id,{correct:0,total:0}])),
+  qCount: 0, sessionMins: 20,
+  fcCards: [], fcQueue: [], fcFlipped: false,
+  debHistory: [], rolesHistory: [],
+  errErrors: [], errFound: 0,
+  modesLog: [],
+};
+
+// ══════════════════════════════════════════════════
+// API KEY
+// ══════════════════════════════════════════════════
+function getKey(){ return localStorage.getItem('roac_api_key') || ''; }
+
+function saveKey(){
+  const k = document.getElementById('api-key-input').value.trim();
+  if(!k) return;
+  localStorage.setItem('roac_api_key', k);
+  go('s-home');
+}
+
+// ══════════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════════
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='s-home') renderHome();
+  if(id==='s-stats') renderStats();
+}
+
+function init(){
+  if(!getKey()){ go('s-setup'); return; }
+  go('s-home');
+}
+
+function setTime(m, el){
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  S.sessionMins = m;
+}
+
+function renderHome(){
+  document.getElementById('topic-list').innerHTML = TOPICS.map(tp => {
+    const s = S.topicStats[tp.id];
+    const p = s.total > 0 ? Math.round(s.correct/s.total*100) : 0;
+    return `<div class="topic-card" onclick="openTopic('${tp.id}')">
+      <div class="topic-icon" style="background:${tp.bg}">${tp.icon}</div>
+      <div class="topic-info">
+        <div class="topic-name">${tp.full}</div>
+        <div class="topic-meta">${s.total} ejercicios · ${p}% aciertos</div>
+        <div class="topic-bar-wrap"><div class="topic-bar" style="width:${p}%;background:${tp.bar}"></div></div>
+      </div>
+      <div style="color:var(--text3);font-size:18px">›</div>
+    </div>`;
+  }).join('');
+}
+
+function openTopic(id){
+  S.topic = id;
+  const t = TOPICS.find(x=>x.id===id);
+  document.getElementById('ts-title').textContent = t.full;
+  document.getElementById('ts-heading').textContent = t.full;
+  go('s-topic');
+}
+
+function startClassic(mode){
+  S.mode = mode;
+  const ml = {test:'Opción múltiple', desarrollo:'Desarrollo', caso:'Caso práctico'};
+  const t = TOPICS.find(x=>x.id===S.topic);
+  document.getElementById('ex-title').textContent = t?.name || '—';
+  document.getElementById('ex-topic-tag').textContent = t?.name || '—';
+  document.getElementById('ex-type-tag').textContent = ml[mode];
+  go('s-exercise');
+  loadQ();
+}
+
+function startCreative(type){
+  if(!S.topic){
+    const ids = TOPICS.map(t=>t.id);
+    S.topic = ids[Math.floor(Math.random()*ids.length)];
+  }
+  if(type==='flashcards') initFC();
+  else if(type==='errores') initErr();
+  else if(type==='debate') initDebate();
+  else if(type==='roles') initRoles();
+}
+
+// ══════════════════════════════════════════════════
+// API CALLS
+// ══════════════════════════════════════════════════
+const API = '/api/claude';
+const SYS_ROAC = `Eres preparador experto del examen ROAC español (Registro Oficial de Auditores de Cuentas).
+Dominas profundamente: NIA-ES 200-810, LAC 22/2015, TRLAC RDL 1/2011, Resoluciones ICAC, Normas Éticas ICJCE, Reglamento UE 537/2014.
+Generas preguntas originales, rigurosas, variadas, en el lenguaje técnico exacto del examen ROAC.
+Respondes SIEMPRE con JSON puro. Sin backticks, sin markdown, sin texto antes ni después del JSON.`;
+
+async function callAI(prompt, sys){
+  const key = getKey();
+  if(!key) throw new Error('Sin clave API');
+  const r = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: sys||SYS_ROAC, messages: [{role:'user',content:prompt}] })
+  });
+  if(!r.ok){ const e = await r.json(); throw new Error(e.error?.message || 'HTTP '+r.status); }
+  const d = await r.json();
+  if(d.error) throw new Error(d.error.message);
+  const raw = d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+  return raw.replace(/```json|```/g,'').trim();
+}
+
+async function callChat(messages, sys){
+  const key = getKey();
+  const r = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, system: sys, messages })
+  });
+  if(!r.ok){ const e = await r.json(); throw new Error(e.error?.message || 'HTTP '+r.status); }
+  const d = await r.json();
+  return d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+}
+
+// ══════════════════════════════════════════════════
+// EJERCICIOS CLÁSICOS
+// ══════════════════════════════════════════════════
+async function loadQ(){
+  if(S.loading) return;
+  S.loading = true; S.selOpt = null; S.awaitNext = false;
+  document.getElementById('fb-area').innerHTML = '';
+  const btn = document.getElementById('ex-btn');
+  btn.textContent = 'Confirmar respuesta'; btn.disabled = true;
+  S.qCount++;
+  const v = VARIANTES[(S.qCount-1) % VARIANTES.length];
+  const topic = TOPICS.find(t=>t.id===S.topic);
+  document.getElementById('q-body').innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando pregunta…</div></div>`;
+
+  const prompts = {
+    test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}.
+Incluye referencia normativa precisa. Varía qué letra (A/B/C/D) es la correcta.
+JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":0,"explicacion":"Explicación técnica detallada.","referencia":"NIA-ES X, párrafo Y"}`,
+
+    desarrollo: `Genera pregunta ${S.qCount} desarrollo ROAC sobre "${topic?.full}", enfoque: ${v}.
+JSON: {"tipo":"desarrollo","normativa":"NIA-ES X / Art.Z LAC","pregunta":"...","respuesta_modelo":"Respuesta técnica completa.","puntos_clave":["p1","p2","p3","p4"],"referencia":"NIA-ES X, párrafo Y"}`,
+
+    caso: `Genera caso práctico ${S.qCount} ROAC sobre "${topic?.full}", enfoque: ${v}. Con datos financieros concretos.
+JSON: {"tipo":"caso","normativa":"NIA-ES X / Art.Z LAC","caso":"Descripción detallada con cifras.","pregunta":"Tarea concreta.","respuesta_modelo":"Resolución completa y técnica.","puntos_clave":["p1","p2","p3"],"referencia":"NIA-ES X, párrafo Y"}`
+  };
+
+  try {
+    const raw = await callAI(prompts[S.mode] || prompts.test);
+    renderQ(JSON.parse(raw));
+  } catch(e) {
+    document.getElementById('q-body').innerHTML = `<div class="loading-wrap"><div style="font-size:32px">⚠️</div><div class="loading-text">Error: ${e.message}<br><br>Pulsa reintentar.</div></div>`;
+    btn.textContent = 'Reintentar'; btn.disabled = false; S.awaitNext = true;
+  }
+  S.loading = false;
+}
+
+function renderQ(q){
+  window._q = q;
+  let h = '';
+  if(q.normativa) h += `<div class="q-norm">📖 ${q.normativa}</div>`;
+  if(q.tipo==='caso') h += `<div class="q-box">${q.caso}</div>`;
+  h += `<div class="q-text">${q.pregunta}</div>`;
+  if(q.tipo==='test'){
+    h += `<div class="options-list">` + q.opciones.map((o,i) =>
+      `<button class="opt-btn" id="opt-${i}" onclick="selOpt(${i})">
+        <span class="opt-letter">${'ABCD'[i]}</span>
+        <span>${o.replace(/^[ABCD]\)\s*/,'')}</span>
+      </button>`).join('') + `</div>`;
+  } else {
+    h += `<textarea class="open-area" id="open-area" placeholder="Escribe tu respuesta aquí…" oninput="document.getElementById('ex-btn').disabled=this.value.trim().length<10"></textarea>`;
+  }
+  document.getElementById('q-body').innerHTML = h;
+  document.getElementById('ex-btn').disabled = q.tipo==='test';
+  document.getElementById('ex-btn').textContent = 'Confirmar respuesta';
+  S.awaitNext = false;
+  updateExProg();
+}
+
+function updateExProg(){
+  const s = S.topicStats[S.topic] || {total:0};
+  document.getElementById('ex-prog-fill').style.width = Math.min(s.total*10,100)+'%';
+  document.getElementById('ex-count').textContent = S.sessionQ+' ej.';
+}
+
+function selOpt(idx){
+  if(S.awaitNext) return;
+  S.selOpt = idx;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>b.classList.toggle('sel',i===idx));
+  document.getElementById('ex-btn').disabled = false;
+}
+
+function handleExBtn(){
+  if(S.loading) return;
+  if(S.awaitNext){ loadQ(); return; }
+  const q = window._q; if(!q) return;
+  q.tipo==='test' ? confirmTest(q) : confirmOpen(q);
+}
+
+function confirmTest(q){
+  const sel = S.selOpt; if(sel===null) return;
+  const ok = sel===q.correcta;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>{
+    b.disabled = true; b.classList.remove('sel');
+    if(i===q.correcta) b.classList.add('correct');
+    else if(i===sel&&!ok) b.classList.add('wrong');
+  });
+  recordResult(ok);
+  let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ok?'¡Correcto!':'Incorrecto'}</span></div><div class="fb-text">${q.explicacion}</div>`;
+  if(q.referencia) h += `<div class="fb-ref">📖 ${q.referencia}</div>`;
+  h += `</div>`;
+  document.getElementById('fb-area').innerHTML = h;
+  document.getElementById('ex-btn').textContent = 'Siguiente pregunta →';
+  document.getElementById('ex-btn').disabled = false;
+  S.awaitNext = true;
+}
+
+async function confirmOpen(q){
+  const ans = document.getElementById('open-area')?.value?.trim();
+  if(!ans||ans.length<10) return;
+  document.getElementById('open-area').disabled = true;
+  document.getElementById('ex-btn').disabled = true;
+  document.getElementById('fb-area').innerHTML = `<div class="fb-panel"><div class="loading-wrap" style="padding:14px 0"><div class="spinner"></div><div class="loading-text">Evaluando tu respuesta…</div></div></div>`;
+  try {
+    const raw = await callAI(`Evalúa respuesta ROAC.\nPregunta:${q.pregunta}\nModelo:${q.respuesta_modelo}\nPuntos clave:${q.puntos_clave?.join(', ')}\nCandidato:${ans}\nJSON:{"correcta":true/false,"puntuacion":0-10,"feedback":"feedback técnico detallado","puntos_logrados":["..."],"puntos_faltantes":["..."],"referencia":"..."}`);
+    const ev = JSON.parse(raw);
+    const ok = ev.puntuacion >= 6;
+    recordResult(ok);
+    let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ev.puntuacion}/10 — ${ok?'Suficiente':'Mejorable'}</span></div><div class="fb-text">${ev.feedback}</div>`;
+    if(ev.puntos_logrados?.length) h += ev.puntos_logrados.map(p=>`<div class="fb-point" style="color:var(--rs)">✓ ${p}</div>`).join('');
+    if(ev.puntos_faltantes?.length) h += ev.puntos_faltantes.map(p=>`<div class="fb-point" style="color:var(--rd)">✗ ${p}</div>`).join('');
+    if(ev.referencia) h += `<div class="fb-ref" style="margin-top:8px">📖 ${ev.referencia}</div>`;
+    h += `</div>`;
+    document.getElementById('fb-area').innerHTML = h;
+  } catch(e) {
+    document.getElementById('fb-area').innerHTML = `<div class="fb-panel"><div class="fb-text">Error al evaluar: ${e.message}</div></div>`;
+  }
+  document.getElementById('ex-btn').textContent = 'Siguiente pregunta →';
+  document.getElementById('ex-btn').disabled = false;
+  S.awaitNext = true;
+  updateExProg();
+}
+
+function recordResult(ok){
+  S.sessionQ++; if(ok) S.sessionOk++;
+  if(S.topic){ S.topicStats[S.topic].total++; if(ok) S.topicStats[S.topic].correct++; }
+}
+
+// ══════════════════════════════════════════════════
+// FLASHCARDS
+// ══════════════════════════════════════════════════
+async function initFC(){
+  go('s-flashcards');
+  S.fcCards=[]; S.fcQueue=[]; S.fcFlipped=false;
+  document.getElementById('fc-rate').style.display='none';
+  document.getElementById('fc-pips').innerHTML='';
+  document.getElementById('fc-sub').textContent='Cargando…';
+  document.getElementById('fc-card').innerHTML=`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando flashcards…</div></div>`;
+  const n = S.sessionMins<=5?6:S.sessionMins<=20?12:20;
+  const topic = TOPICS.find(t=>t.id===S.topic);
+  try {
+    const raw = await callAI(`Genera exactamente ${n} flashcards ROAC sobre "${topic?.full}". Varía el tipo: definiciones NIA-ES, artículos LAC, tipos de opinión, criterios independencia, procedimientos, plazos legales.
+Array JSON: [{"frente":"Pregunta concisa","reverso":"Explicación técnica precisa","normativa":"NIA-ES X / Art.Y LAC"}]
+Solo el array, sin nada más.`);
+    S.fcCards = JSON.parse(raw);
+    S.fcQueue = S.fcCards.map((_,i)=>i);
+    renderFC();
+    S.modesLog.push('Flashcards — '+topic?.full);
+  } catch(e) {
+    document.getElementById('fc-card').innerHTML=`<div class="loading-wrap"><div style="font-size:32px">⚠️</div><div class="loading-text">Error: ${e.message}</div></div>`;
+  }
+}
+
+function renderFC(){
+  if(!S.fcQueue.length){
+    document.getElementById('fc-card').innerHTML=`<div style="text-align:center"><div style="font-size:48px">🏆</div><div style="font-size:17px;font-weight:700;color:var(--text);margin-top:12px">¡Mazo completado!</div></div>`;
+    document.getElementById('fc-rate').style.display='none';
+    document.getElementById('fc-sub').textContent=S.fcCards.length+' tarjetas repasadas';
+    renderFCPips(); return;
+  }
+  S.fcFlipped=false;
+  document.getElementById('fc-rate').style.display='none';
+  const c = S.fcCards[S.fcQueue[0]];
+  const done = S.fcCards.length - S.fcQueue.length;
+  document.getElementById('fc-card').innerHTML=`<div class="fc-front">${c.frente}</div><div class="fc-hint">Pulsa para ver la respuesta</div>`;
+  document.getElementById('fc-sub').textContent=`Tarjeta ${done+1} de ${S.fcCards.length}`;
+  renderFCPips();
+}
+
+function renderFCPips(){
+  const total=S.fcCards.length, done=total-S.fcQueue.length;
+  document.getElementById('fc-pips').innerHTML=Array.from({length:total},(_,i)=>`<div class="fc-pip ${i<done?'done':i===done?'cur':''}"></div>`).join('');
+}
+
+function flipCard(){
+  if(!S.fcQueue.length){ initFC(); return; }
+  if(S.fcFlipped) return;
+  S.fcFlipped=true;
+  const c = S.fcCards[S.fcQueue[0]];
+  document.getElementById('fc-card').innerHTML=`${c.normativa?`<div class="fc-norm">${c.normativa}</div>`:''}${c.frente?`<div class="fc-back-title">${c.frente}</div>`:''}${c.reverso?`<div class="fc-back">${c.reverso}</div>`:''}`;
+  document.getElementById('fc-rate').style.display='block';
+}
+
+function rateCard(r){
+  const idx = S.fcQueue.shift();
+  if(r==='hard') S.fcQueue.push(idx);
+  else if(r==='medium'){ const m=Math.max(1,Math.floor(S.fcQueue.length/2)); S.fcQueue.splice(m,0,idx); }
+  renderFC();
+}
+
+// ══════════════════════════════════════════════════
+// ERROR DETECTION
+// ══════════════════════════════════════════════════
+async function initErr(){
+  go('s-errores');
+  S.errErrors=[]; S.errFound=0;
+  document.getElementById('err-score-bar').style.display='none';
+  document.getElementById('err-fb').innerHTML='';
+  document.getElementById('err-btn').disabled=true;
+  document.getElementById('err-btn').textContent='Ver solución';
+  const topic = TOPICS.find(t=>t.id===S.topic);
+  document.getElementById('err-body').innerHTML=`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando extracto con errores…</div></div>`;
+  try {
+    const raw = await callAI(`Genera extracto de informe auditoría sobre "${topic?.full}" con exactamente 4 errores técnicos sutiles y realistas (terminología incorrecta, artículos equivocados, criterios erróneos, omisiones normativas). Típicos de candidatos ROAC que suspenden.
+IMPORTANTE: "texto_erroneo" debe ser frase literal de los párrafos.
+JSON: {"titulo":"Extracto de [tipo]","parrafos":["párrafo 1","párrafo 2","párrafo 3"],"errores":[{"texto_erroneo":"frase literal","explicacion":"Por qué es incorrecto y norma correcta.","referencia":"NIA-ES X / Art.Y LAC"},{"texto_erroneo":"...","explicacion":"...","referencia":"..."},{"texto_erroneo":"...","explicacion":"...","referencia":"..."},{"texto_erroneo":"...","explicacion":"...","referencia":"..."}]}`);
+    const doc = JSON.parse(raw);
+    S.errErrors = doc.errores;
+    renderErrDoc(doc);
+    S.modesLog.push('Detectar errores — '+topic?.full);
+  } catch(e) {
+    document.getElementById('err-body').innerHTML=`<div class="loading-wrap"><div style="font-size:32px">⚠️</div><div class="loading-text">Error: ${e.message}</div></div>`;
+  }
+}
+
+function renderErrDoc(doc){
+  S.errFound=0;
+  let html=`<div class="err-doc"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">${doc.titulo}</div>`;
+  doc.parrafos.forEach(p=>{
+    let pp=p;
+    doc.errores.forEach((err,i)=>{
+      if(pp.includes(err.texto_erroneo)){
+        pp=pp.split(err.texto_erroneo).join(`<span class="err-hl" id="eh-${i}" onclick="markErr(${i})">${err.texto_erroneo}</span>`);
+      }
+    });
+    html+=`<p>${pp}</p>`;
+  });
+  html+=`</div>`;
+  document.getElementById('err-body').innerHTML=html;
+  document.getElementById('err-score-bar').style.display='flex';
+  document.getElementById('err-val').textContent=`0/${doc.errores.length}`;
+  document.getElementById('err-btn').disabled=false;
+}
+
+function markErr(i){
+  const s=document.getElementById(`eh-${i}`); if(!s) return;
+  if(s.classList.contains('marked')){ s.classList.remove('marked'); S.errFound--; }
+  else{ s.classList.add('marked'); S.errFound++; }
+  document.getElementById('err-val').textContent=`${S.errFound}/${S.errErrors.length}`;
+}
+
+function handleErrBtn(){
+  const btn=document.getElementById('err-btn');
+  if(btn.textContent==='Nuevo ejercicio'){ initErr(); return; }
+  S.errErrors.forEach((_,i)=>{ const s=document.getElementById(`eh-${i}`); if(s){s.classList.remove('marked');s.classList.add('found');} });
+  let h=`<div class="fb-panel"><div class="fb-result"><div class="fb-icon">📋</div><span class="fb-label ok">Solución — ${S.errFound}/${S.errErrors.length} encontrados</span></div>`;
+  S.errErrors.forEach((err,i)=>{
+    h+=`<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border)"><div style="font-size:12px;font-weight:700;color:var(--rd);margin-bottom:3px">Error ${i+1}: "${err.texto_erroneo}"</div><div class="fb-text" style="margin-bottom:3px">${err.explicacion}</div><div class="fb-ref">📖 ${err.referencia}</div></div>`;
+  });
+  h+=`</div>`;
+  document.getElementById('err-fb').innerHTML=h;
+  btn.textContent='Nuevo ejercicio';
+}
+
+// ══════════════════════════════════════════════════
+// DEBATE
+// ══════════════════════════════════════════════════
+async function initDebate(){
+  go('s-debate');
+  S.debHistory=[];
+  document.getElementById('deb-chat').innerHTML='';
+  document.getElementById('deb-inp').disabled=true;
+  document.getElementById('deb-send').disabled=true;
+  const topic = TOPICS.find(t=>t.id===S.topic);
+  document.getElementById('deb-tag').textContent=topic?.name||'—';
+  addMsg('deb-chat','sys','Preparando postura incorrecta…');
+  try {
+    const raw = await callAI(`Genera postura técnica INCORRECTA sobre "${topic?.full}" para debate ROAC. Plausible pero errónea, rebatible con normativa.
+JSON: {"postura":"2-3 frases en primera persona defendiendo la postura incorrecta","tema":"Título corto (máx 5 palabras)","pista":"Solo la referencia normativa que la desmonta"}`);
+    const deb = JSON.parse(raw);
+    window._deb = deb;
+    document.querySelector('#deb-chat .msg.sys')?.remove();
+    addMsg('deb-chat','sys',`Debate: ${deb.tema}`);
+    addMsg('deb-chat','ai',`Mi postura: ${deb.postura}\n\n¿Puedes rebatirla con argumentos normativos?`);
+    S.debHistory=[{role:'assistant',content:`Mi postura: ${deb.postura}`}];
+    document.getElementById('deb-inp').disabled=false;
+    document.getElementById('deb-send').disabled=false;
+    S.modesLog.push('Debate técnico — '+topic?.full);
+  } catch(e) {
+    addMsg('deb-chat','sys','Error al cargar: '+e.message);
+  }
+}
+
+async function sendDebate(){
+  const inp=document.getElementById('deb-inp');
+  const txt=inp.value.trim(); if(!txt) return;
+  inp.value=''; inp.disabled=true; document.getElementById('deb-send').disabled=true;
+  addMsg('deb-chat','user',txt);
+  S.debHistory.push({role:'user',content:txt});
+  const thinking=addMsg('deb-chat','ai','…');
+  const deb=window._deb;
+  const sys=`Defiendes una postura incorrecta en debate ROAC: "${deb?.postura}". Mantén la postura 2-3 turnos. Si el candidato usa la normativa correcta (${deb?.pista}), concede y explica el error de tu postura. Responde en lenguaje técnico de auditoría, 2-4 frases. Solo texto, sin JSON.`;
+  try {
+    const resp=await callChat(S.debHistory,sys);
+    thinking.textContent=resp;
+    S.debHistory.push({role:'assistant',content:resp});
+  } catch(e){ thinking.textContent='Error: '+e.message; }
+  inp.disabled=false; document.getElementById('deb-send').disabled=false; inp.focus();
+  scrollChat('deb-chat');
+}
+
+// ══════════════════════════════════════════════════
+// ROLES
+// ══════════════════════════════════════════════════
+async function initRoles(){
+  go('s-roles');
+  S.rolesHistory=[];
+  document.getElementById('roles-chat').innerHTML='';
+  document.getElementById('roles-inp').disabled=true;
+  document.getElementById('roles-send').disabled=true;
+  const topic = TOPICS.find(t=>t.id===S.topic);
+  document.getElementById('roles-tag').textContent=topic?.name||'—';
+  addMsg('roles-chat','sys','Preparando escenario…');
+  try {
+    const raw = await callAI(`Genera escenario juego de roles ROAC sobre "${topic?.full}". Alumno es auditor senior.
+JSON: {"empresa":"Nombre y sector","situacion":"Situación problemática concreta, 2 frases","primer_mensaje":"Mensaje inicial del director financiero al auditor, natural, 2-3 frases"}`);
+    const sc = JSON.parse(raw);
+    window._sc = sc;
+    document.querySelector('#roles-chat .msg.sys')?.remove();
+    addMsg('roles-chat','sys',`Empresa: ${sc.empresa}`);
+    addMsg('roles-chat','sys',`Situación: ${sc.situacion}`);
+    addMsg('roles-chat','ai',sc.primer_mensaje);
+    S.rolesHistory=[{role:'assistant',content:sc.primer_mensaje}];
+    document.getElementById('roles-inp').disabled=false;
+    document.getElementById('roles-send').disabled=false;
+    S.modesLog.push('Juego de roles — '+topic?.full);
+  } catch(e) {
+    addMsg('roles-chat','sys','Error: '+e.message);
+  }
+}
+
+async function sendRoles(){
+  const inp=document.getElementById('roles-inp');
+  const txt=inp.value.trim(); if(!txt) return;
+  inp.value=''; inp.disabled=true; document.getElementById('roles-send').disabled=true;
+  addMsg('roles-chat','user',txt);
+  S.rolesHistory.push({role:'user',content:txt});
+  const thinking=addMsg('roles-chat','ai','…');
+  const sc=window._sc;
+  const topicFull = TOPICS.find(t=>t.id===S.topic)?.full||'';
+  const sys=`Eres el director financiero de "${sc?.empresa}" en juego de roles ROAC sobre "${topicFull}". El alumno es auditor senior. Si sus respuestas son técnicamente correctas avanza el escenario con nuevas complicaciones; si son incorrectas muestra confusión o da pistas. Al final añade entre corchetes nota de evaluación: [Evaluación: ...]. Responde en 3-5 frases naturales. Sin JSON.`;
+  try {
+    const resp=await callChat(S.rolesHistory,sys);
+    thinking.textContent=resp;
+    S.rolesHistory.push({role:'assistant',content:resp});
+  } catch(e){ thinking.textContent='Error: '+e.message; }
+  inp.disabled=false; document.getElementById('roles-send').disabled=false; inp.focus();
+  scrollChat('roles-chat');
+}
+
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
+function addMsg(wrapId, type, text){
+  const w=document.getElementById(wrapId);
+  const d=document.createElement('div');
+  d.className=`msg ${type}`;
+  d.textContent=text;
+  w.appendChild(d);
+  w.scrollTop=w.scrollHeight;
+  return d;
+}
+
+function scrollChat(id){ const w=document.getElementById(id); if(w) w.scrollTop=w.scrollHeight; }
+
+function renderStats(){
+  const t=S.sessionQ, ok=S.sessionOk, pct=t>0?Math.round(ok/t*100):0;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="big-stat"><div class="big-stat-val">${t}</div><div class="big-stat-lbl">Ejercicios</div></div>
+    <div class="big-stat"><div class="big-stat-val">${pct}%</div><div class="big-stat-lbl">Aciertos</div></div>
+    <div class="big-stat"><div class="big-stat-val">${ok}</div><div class="big-stat-lbl">Correctas</div></div>
+    <div class="big-stat"><div class="big-stat-val">${t-ok}</div><div class="big-stat-lbl">A repasar</div></div>`;
+  const bc={nia:'#185FA5',independencia:'#0F6E56',informes:'#BA7517',planificacion:'#533AB7',control:'#993556'};
+  document.getElementById('topic-prog').innerHTML=TOPICS.map(tp=>{
+    const s=S.topicStats[tp.id], p=s.total>0?Math.round(s.correct/s.total*100):0;
+    return`<div class="tpl-row"><div class="tpl-header"><span class="tpl-name">${tp.full}</span><span class="tpl-pct">${p}% (${s.total})</span></div><div class="tpl-track"><div class="tpl-fill" style="width:${p}%;background:${bc[tp.id]}"></div></div></div>`;
+  }).join('');
+  const ml=document.getElementById('modes-log');
+  ml.innerHTML=S.modesLog.length?S.modesLog.map(m=>`<div style="padding:4px 0;border-bottom:0.5px solid var(--border)">${m}</div>`).join(''):'Sin actividad aún.';
+}
+
+// ══════════════════════════════════════════════════
+// ARRANQUE
+// ══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>

@@ -647,16 +647,23 @@ async function loadQ(){
   const topic = TOPICS.find(t=>t.id===S.topic);
   document.getElementById('q-body').innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Generando pregunta…</div></div>`;
 
+  // Adaptar al tiempo disponible
+  const timeInstr = S.sessionMins <= 5
+    ? 'IMPORTANTE: sesión rápida de 5 min. Enunciado MUY CORTO (máx 2 líneas). Opciones brevísimas (máx 8 palabras). Sin casos largos.'
+    : S.sessionMins <= 20
+    ? 'Enunciado claro, nivel examen ROAC estándar.'
+    : 'Enunciado complejo y detallado, contexto empresarial rico, múltiples variables, nivel máximo de examen.';
+
   const prompts = {
-    test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}.
-Incluye referencia normativa precisa. Varía qué letra (A/B/C/D) es la correcta.
+    test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}
+Varía qué letra (A/B/C/D) es la correcta.
 JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":0,"explicacion":"Explicación técnica detallada.","referencia":"NIA-ES X, párrafo Y"}`,
 
-    desarrollo: `Genera pregunta ${S.qCount} desarrollo ROAC sobre "${topic?.full}", enfoque: ${v}.
+    desarrollo: `Genera pregunta ${S.qCount} desarrollo ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}
 JSON: {"tipo":"desarrollo","normativa":"NIA-ES X / Art.Z LAC","pregunta":"...","respuesta_modelo":"Respuesta técnica completa.","puntos_clave":["p1","p2","p3","p4"],"referencia":"NIA-ES X, párrafo Y"}`,
 
-    caso: `Genera caso práctico ${S.qCount} ROAC sobre "${topic?.full}", enfoque: ${v}. Con datos financieros concretos.
-JSON: {"tipo":"caso","normativa":"NIA-ES X / Art.Z LAC","caso":"Descripción detallada con cifras.","pregunta":"Tarea concreta.","respuesta_modelo":"Resolución completa y técnica.","puntos_clave":["p1","p2","p3"],"referencia":"NIA-ES X, párrafo Y"}`
+    caso: `Genera caso práctico ${S.qCount} ROAC sobre "${topic?.full}", enfoque: ${v}. Con datos concretos. ${timeInstr}
+JSON: {"tipo":"caso","normativa":"NIA-ES X / Art.Z LAC","caso":"Descripción con cifras.","pregunta":"Tarea concreta.","respuesta_modelo":"Resolución completa.","puntos_clave":["p1","p2","p3"],"referencia":"NIA-ES X, párrafo Y"}`
   };
 
   try {

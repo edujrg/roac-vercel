@@ -187,6 +187,18 @@
   .err-hl.marked { background: var(--rdl); color: var(--rd); border-bottom-color: var(--rd); }
   .err-hl.found { background: var(--rsl); color: var(--rs); border-bottom-color: var(--rs); }
 
+  /* CHAT DUDAS */
+  .doubt-wrap { margin-top:14px; border-top:0.5px solid var(--border); padding-top:12px; }
+  .doubt-label { font-size:12px; font-weight:600; color:var(--text3); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .doubt-msgs { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+  .doubt-msg-ai { background:var(--bg); border-radius:var(--radius); padding:10px 12px; font-size:13px; color:var(--text); line-height:1.6; }
+  .doubt-msg-user { background:var(--rpl); border-radius:var(--radius); padding:8px 12px; font-size:13px; color:var(--rp8); align-self:flex-end; max-width:90%; }
+  .doubt-input-row { display:flex; gap:8px; }
+  .doubt-inp { flex:1; border:0.5px solid var(--border2); border-radius:var(--radius-lg); padding:10px 12px; font-size:13px; font-family:inherit; color:var(--text); background:var(--surface); outline:none; }
+  .doubt-inp:focus { border-color:var(--rp); }
+  .doubt-send { background:var(--rp); border:none; border-radius:var(--radius-lg); padding:10px 14px; cursor:pointer; color:#B5D4F4; font-size:16px; flex-shrink:0; }
+  .doubt-send:disabled { opacity:.4; cursor:not-allowed; }
+
   /* STATS */
   .stats-content { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
   .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -752,6 +764,64 @@ function parseJSON(raw) {
 }
 
 
+
+// ── CHAT DE DUDAS CONTEXTUAL ──
+function renderDoubtChat(questionContext){
+  // questionContext: texto de la pregunta + explicación para dar contexto a la IA
+  window._doubtContext = questionContext;
+  window._doubtHistory = [];
+  return `
+    <div class="doubt-wrap" id="doubt-wrap">
+      <div class="doubt-label">💬 ¿Te ha surgido alguna duda?</div>
+      <div class="doubt-msgs" id="doubt-msgs"></div>
+      <div class="doubt-input-row">
+        <input class="doubt-inp" id="doubt-inp" placeholder="Pregunta lo que quieras sobre este tema…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendDoubt();}">
+        <button class="doubt-send" id="doubt-send" onclick="sendDoubt()">⬆</button>
+      </div>
+    </div>`;
+}
+
+async function sendDoubt(){
+  const inp = document.getElementById('doubt-inp');
+  const txt = inp?.value?.trim();
+  if(!txt) return;
+  inp.value = ''; inp.disabled = true;
+  document.getElementById('doubt-send').disabled = true;
+
+  // Añadir mensaje del usuario
+  const msgs = document.getElementById('doubt-msgs');
+  const uDiv = document.createElement('div');
+  uDiv.className = 'doubt-msg-user'; uDiv.textContent = txt;
+  msgs.appendChild(uDiv);
+
+  // Mensaje de espera
+  const aDiv = document.createElement('div');
+  aDiv.className = 'doubt-msg-ai'; aDiv.textContent = '…';
+  msgs.appendChild(aDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  window._doubtHistory.push({role:'user', content: txt});
+
+  const sys = `Eres un preparador experto del examen ROAC español. El alumno acaba de resolver esta pregunta:
+
+${window._doubtContext}
+
+Responde su duda de forma directa, técnica y concisa (máx 4 frases). Menciona siempre la normativa relevante (NIA-ES, LAC 22/2015, TRLAC, etc.). Sin JSON, solo texto.`;
+
+  try {
+    const resp = await callChat(window._doubtHistory, sys);
+    aDiv.textContent = resp;
+    window._doubtHistory.push({role:'assistant', content: resp});
+  } catch(e) {
+    aDiv.textContent = 'Error: ' + e.message;
+  }
+
+  inp.disabled = false;
+  document.getElementById('doubt-send').disabled = false;
+  inp.focus();
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
 // ── APRENDIZAJE ADAPTATIVO ──
 function getWeakestTopic(){
   // Devuelve el tema con peor ratio de aciertos (mínimo 3 intentos)
@@ -898,9 +968,10 @@ function confirmTest(q){
     else if(i===sel&&!ok) b.classList.add('wrong');
   });
   recordResult(ok, window._q?.pregunta);
+  const qCtx = `Pregunta: ${q.pregunta||q.caso||''}\nExplicación: ${q.explicacion||q.respuesta_modelo||''}\nNormativa: ${q.referencia||q.normativa||''}`;
   let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ok?'¡Correcto!':'Incorrecto'}</span></div><div class="fb-text">${q.explicacion}</div>`;
   if(q.referencia) h += `<div class="fb-ref">📖 ${q.referencia}</div>`;
-  h += `</div>`;
+  h += renderDoubtChat(qCtx) + `</div>`;
   document.getElementById('fb-area').innerHTML = h;
   document.getElementById('ex-btn').textContent = 'Siguiente pregunta →';
   document.getElementById('ex-btn').disabled = false;

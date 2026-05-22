@@ -799,6 +799,7 @@ async function confirmOpen(q){
 function recordResult(ok){
   S.sessionQ++; if(ok) S.sessionOk++;
   if(S.topic){ S.topicStats[S.topic].total++; if(ok) S.topicStats[S.topic].correct++; }
+  saveProgress();
 }
 
 // ══════════════════════════════════════════════════

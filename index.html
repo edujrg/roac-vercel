@@ -210,6 +210,7 @@
   <div class="topbar">
     <span class="logo">ROAC 2026</span>
     <span class="topbar-title">Configuración</span>
+    <button class="icon-btn" id="setup-back-btn" style="display:none" onclick="go('s-home')">← Volver</button>
   </div>
   <div class="setup-wrap">
     <div class="setup-title">Bienvenido a Academia ROAC</div>
@@ -575,6 +576,8 @@ function saveKey(){
 function showSetupPanel(){
   const key = getKey();
   const wrap = document.getElementById('current-key-wrap');
+  const backBtn = document.getElementById('setup-back-btn');
+  if(backBtn) backBtn.style.display = key ? 'flex' : 'none';
   if(key && wrap){
     wrap.style.display='block';
     document.getElementById('show-key-input').value = key;

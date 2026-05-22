@@ -270,6 +270,14 @@
         <div class="mi">🕴️</div><div class="mn">Juego de roles</div><div class="md">Tú eres el auditor</div>
       </div>
     </div>
+    <div onclick="startZonaMejora()" style="background:var(--rdl);border:1.5px solid var(--rd);border-radius:var(--radius-lg);padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-top:2px;">
+      <div style="font-size:28px">🎯</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--rd)">Zona de mejora</div>
+        <div style="font-size:12px;color:var(--rd);opacity:0.8;margin-top:2px">Preguntas adaptadas a tus puntos débiles</div>
+      </div>
+      <div style="margin-left:auto;color:var(--rd);font-size:18px">›</div>
+    </div>
   </div>
 </div>
 
@@ -462,7 +470,7 @@ function getProgressId(){
 async function saveProgress() {
   const id = getProgressId();
   if(!id) return;
-  const data = { topicStats: S.topicStats, sessionQ: S.sessionQ, sessionOk: S.sessionOk, modesLog: S.modesLog.slice(-20) };
+  const data = { topicStats: S.topicStats, sessionQ: S.sessionQ, sessionOk: S.sessionOk, modesLog: S.modesLog.slice(-20), weakPoints: S.weakPoints };
   try { localStorage.setItem('roac_progress', JSON.stringify(data)); } catch(e) {}
   try {
     await fetch(`${SB_URL}/rest/v1/roac_progress`, {
@@ -482,6 +490,7 @@ async function loadProgress() {
       if(d.sessionQ) S.sessionQ = d.sessionQ;
       if(d.sessionOk) S.sessionOk = d.sessionOk;
       if(d.modesLog) S.modesLog = d.modesLog;
+      if(d.weakPoints) S.weakPoints = d.weakPoints;
     }
   } catch(e) {}
   const id = getProgressId();
@@ -497,6 +506,7 @@ async function loadProgress() {
       if(d.sessionQ) S.sessionQ = d.sessionQ;
       if(d.sessionOk) S.sessionOk = d.sessionOk;
       if(d.modesLog) S.modesLog = d.modesLog;
+      if(d.weakPoints) S.weakPoints = d.weakPoints;
       localStorage.setItem('roac_progress', JSON.stringify(d));
       renderHome();
     }
@@ -518,6 +528,7 @@ let S = {
   sessionQ: 0, sessionOk: 0,
   selOpt: null, awaitNext: false, loading: false,
   topicStats: Object.fromEntries(TOPICS.map(t=>[t.id,{correct:0,total:0}])),
+  weakPoints: {}, // {topicId: {fails:0, lastTopics:[], keywords:[]}}
   qCount: 0, sessionMins: 20,
   fcCards: [], fcQueue: [], fcFlipped: false,
   debHistory: [], rolesHistory: [],
@@ -543,7 +554,7 @@ function saveKey(){
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(id==='s-home') renderHome();
+  if(id==='s-home'){ S.zonasMejora=false; renderHome(); }
   if(id==='s-stats') renderStats();
 }
 
@@ -670,6 +681,59 @@ function parseJSON(raw) {
   }
 }
 
+
+// ── APRENDIZAJE ADAPTATIVO ──
+function getWeakestTopic(){
+  // Devuelve el tema con peor ratio de aciertos (mínimo 3 intentos)
+  let worst = null, worstRatio = 1;
+  TOPICS.forEach(tp => {
+    const s = S.topicStats[tp.id];
+    if(s.total >= 3){
+      const ratio = s.correct / s.total;
+      if(ratio < worstRatio){ worstRatio = ratio; worst = tp.id; }
+    }
+  });
+  return worst;
+}
+
+function getWeakContext(){
+  // Genera contexto de puntos débiles para el prompt
+  const weak = [];
+  TOPICS.forEach(tp => {
+    const s = S.topicStats[tp.id];
+    const wp = S.weakPoints[tp.id];
+    if(s.total >= 2 && s.correct/s.total < 0.6){
+      weak.push(`${tp.full} (${Math.round(s.correct/s.total*100)}% aciertos)`);
+    }
+  });
+  if(weak.length === 0) return '';
+  return `ATENCIÓN: El alumno tiene dificultades especiales en: ${weak.join(', ')}. Enfoca la pregunta en estos puntos débiles.`;
+}
+
+function getFailedQuestions(topicId){
+  const wp = S.weakPoints[topicId];
+  if(!wp?.questions?.length) return '';
+  return `Preguntas que el alumno ha fallado antes: ${wp.questions.join(' | ')}. Genera preguntas similares pero con diferente enfoque para reforzar estos conceptos.`;
+}
+
+async function startZonaMejora(){
+  // Seleccionar automáticamente el tema más débil
+  const weakTopic = getWeakestTopic();
+  if(!weakTopic){
+    alert('¡Aún no hay suficientes datos! Haz al menos 3 ejercicios por bloque primero.');
+    return;
+  }
+  S.topic = weakTopic;
+  S.mode = 'test';
+  S.zonasMejora = true;
+  const t = TOPICS.find(x=>x.id===weakTopic);
+  document.getElementById('ex-title').textContent = '🎯 ' + t?.name;
+  document.getElementById('ex-topic-tag').textContent = t?.name;
+  document.getElementById('ex-type-tag').textContent = 'Zona de mejora';
+  go('s-exercise');
+  loadQ();
+}
+
 async function loadQ(){
   if(S.loading) return;
   S.loading = true; S.selOpt = null; S.awaitNext = false;
@@ -688,8 +752,11 @@ async function loadQ(){
     ? 'Enunciado claro, nivel examen ROAC estándar.'
     : 'Enunciado complejo y detallado, contexto empresarial rico, múltiples variables, nivel máximo de examen.';
 
+  const weakCtx = S.zonasMejora ? getFailedQuestions(S.topic) : getWeakContext();
+  const adaptCtx = weakCtx ? `\n${weakCtx}` : '';
+
   const prompts = {
-    test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}
+    test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}${adaptCtx}
 Varía qué letra (A/B/C/D) es la correcta.
 JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":0,"explicacion":"Explicación técnica detallada.","referencia":"NIA-ES X, párrafo Y"}`,
 
@@ -760,7 +827,7 @@ function confirmTest(q){
     if(i===q.correcta) b.classList.add('correct');
     else if(i===sel&&!ok) b.classList.add('wrong');
   });
-  recordResult(ok);
+  recordResult(ok, window._q?.pregunta);
   let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ok?'¡Correcto!':'Incorrecto'}</span></div><div class="fb-text">${q.explicacion}</div>`;
   if(q.referencia) h += `<div class="fb-ref">📖 ${q.referencia}</div>`;
   h += `</div>`;
@@ -780,7 +847,7 @@ async function confirmOpen(q){
     const raw = await callAI(`Evalúa respuesta ROAC.\nPregunta:${q.pregunta}\nModelo:${q.respuesta_modelo}\nPuntos clave:${q.puntos_clave?.join(', ')}\nCandidato:${ans}\nJSON:{"correcta":true/false,"puntuacion":0-10,"feedback":"feedback técnico detallado","puntos_logrados":["..."],"puntos_faltantes":["..."],"referencia":"..."}`);
     const ev = parseJSON(raw);
     const ok = ev.puntuacion >= 6;
-    recordResult(ok);
+    recordResult(ok, window._q?.pregunta);
     let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ev.puntuacion}/10 — ${ok?'Suficiente':'Mejorable'}</span></div><div class="fb-text">${ev.feedback}</div>`;
     if(ev.puntos_logrados?.length) h += ev.puntos_logrados.map(p=>`<div class="fb-point" style="color:var(--rs)">✓ ${p}</div>`).join('');
     if(ev.puntos_faltantes?.length) h += ev.puntos_faltantes.map(p=>`<div class="fb-point" style="color:var(--rd)">✗ ${p}</div>`).join('');
@@ -796,9 +863,23 @@ async function confirmOpen(q){
   updateExProg();
 }
 
-function recordResult(ok){
+function recordResult(ok, questionText){
   S.sessionQ++; if(ok) S.sessionOk++;
-  if(S.topic){ S.topicStats[S.topic].total++; if(ok) S.topicStats[S.topic].correct++; }
+  if(S.topic){
+    S.topicStats[S.topic].total++;
+    if(ok) S.topicStats[S.topic].correct++;
+    else {
+      // Registrar fallo en weakPoints
+      if(!S.weakPoints[S.topic]) S.weakPoints[S.topic] = {fails:0, questions:[]};
+      S.weakPoints[S.topic].fails++;
+      if(questionText) {
+        S.weakPoints[S.topic].questions = [
+          questionText.substring(0,120),
+          ...(S.weakPoints[S.topic].questions||[])
+        ].slice(0,5); // últimas 5 preguntas falladas
+      }
+    }
+  }
   saveProgress();
 }
 

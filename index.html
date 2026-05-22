@@ -230,6 +230,24 @@
 
     <input class="setup-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off" oninput="document.getElementById('save-key-btn').disabled=this.value.trim().length<10">
     <button class="btn-primary" id="save-key-btn" disabled onclick="saveKey()">Guardar y empezar →</button>
+
+    <div id="current-key-wrap" style="display:none;background:var(--bg);border-radius:var(--radius-lg);padding:14px;border:0.5px solid var(--border);">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Clave guardada</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="show-key-input" type="password" readonly style="flex:1;background:none;border:none;font-size:13px;font-family:monospace;color:var(--text2);outline:none;">
+        <button onclick="toggleShowKey()" style="background:none;border:0.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--text2);">Ver</button>
+        <button onclick="copyKey()" style="background:var(--rp);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;color:#cce4ff;">Copiar</button>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border);">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Tu ID de progreso (para sincronizar entre dispositivos)</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <code id="show-uid" style="font-size:12px;color:var(--text2);flex:1;word-break:break-all;"></code>
+          <button onclick="copyUID()" style="background:none;border:0.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--text2);">Copiar ID</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">Para usar el mismo progreso en otro dispositivo, copia este ID y pégalo en ese dispositivo.</div>
+        <button onclick="setCustomUID()" style="margin-top:8px;background:none;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;color:var(--text2);width:100%">📲 Pegar ID de otro dispositivo</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -239,7 +257,7 @@
     <span class="logo">ROAC 2026</span>
     <span class="topbar-title">Academia Auditoría</span>
     <button class="icon-btn" onclick="go('s-stats')">📊</button>
-    <button class="icon-btn" onclick="go('s-setup')" title="Cambiar API key">⚙️</button>
+    <button class="icon-btn" onclick="goSetup()" title="Cambiar API key">⚙️</button>
   </div>
   <div class="hero">
     <div class="hero-greeting">Bienvenido de nuevo</div>
@@ -460,11 +478,17 @@ const SB_URL = 'https://posuihzngblupplnsipy.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvc3VpaHpuZ2JsdXBwbG5zaXB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Nzg1NjAsImV4cCI6MjA5NTA1NDU2MH0.DMHZmDNzyXBpR4EWz22BPV1ktLABJ4hjF6LKyVWqfmE';
 
 function getProgressId(){
-  const key = getKey();
-  if(!key) return null;
-  let hash = 0;
-  for(let i=0;i<key.length;i++) hash = ((hash<<5)-hash)+key.charCodeAt(i);
-  return 'user_' + Math.abs(hash).toString(36);
+  // Usar un ID fijo generado una vez, independiente de la clave API
+  let uid = localStorage.getItem('roac_uid');
+  if(!uid){
+    uid = 'user_' + Math.random().toString(36).substring(2,10) + Date.now().toString(36);
+    localStorage.setItem('roac_uid', uid);
+  }
+  return uid;
+}
+
+function getUserId(){
+  return localStorage.getItem('roac_uid') || '—';
 }
 
 async function saveProgress() {
@@ -548,6 +572,44 @@ function saveKey(){
   go('s-home');
 }
 
+function showSetupPanel(){
+  const key = getKey();
+  const wrap = document.getElementById('current-key-wrap');
+  if(key && wrap){
+    wrap.style.display='block';
+    document.getElementById('show-key-input').value = key;
+    document.getElementById('show-uid').textContent = getUserId();
+    document.getElementById('save-key-btn').disabled = true;
+    document.getElementById('api-key-input').placeholder = '••• Clave guardada — introduce una nueva para cambiarla';
+  }
+}
+
+function toggleShowKey(){
+  const inp = document.getElementById('show-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function copyKey(){
+  const key = getKey();
+  if(key){ navigator.clipboard.writeText(key).then(()=>alert('Clave copiada al portapapeles')); }
+}
+
+function copyUID(){
+  const uid = getUserId();
+  navigator.clipboard.writeText(uid).then(()=>alert('ID copiado. Pégalo en el otro dispositivo en Ajustes → Sincronizar ID'));
+}
+
+function setCustomUID(){
+  const uid = prompt('Pega aquí el ID de progreso del otro dispositivo:');
+  if(uid && uid.startsWith('user_')){
+    localStorage.setItem('roac_uid', uid);
+    alert('ID actualizado. El progreso se sincronizará con ese dispositivo.');
+    loadProgress();
+  } else {
+    alert('ID no válido. Debe empezar por "user_"');
+  }
+}
+
 // ══════════════════════════════════════════════════
 // NAVEGACIÓN
 // ══════════════════════════════════════════════════
@@ -563,6 +625,11 @@ async function init(){
   go('s-home');
   await loadProgress();
   renderHome();
+}
+
+function goSetup(){
+  go('s-setup');
+  setTimeout(showSetupPanel, 100);
 }
 
 function setTime(m, el){

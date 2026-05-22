@@ -465,11 +465,12 @@
 // DATOS
 // ══════════════════════════════════════════════════
 const TOPICS = [
-  {id:'nia',       name:'Normas NIA-ES',         full:'Normas de Auditoría (NIA-ES)',          icon:'📖', color:'#185FA5', bg:'#E6F1FB', bar:'#185FA5'},
-  {id:'independencia', name:'Independencia',     full:'Independencia y ética profesional',     icon:'🛡️', color:'#0F6E56', bg:'#E1F5EE', bar:'#0F6E56'},
-  {id:'informes',  name:'Informes',               full:'Informes de auditoría',                icon:'📄', color:'#BA7517', bg:'#FAEEDA', bar:'#BA7517'},
-  {id:'planificacion', name:'Planificación',      full:'Planificación y procedimientos',        icon:'📋', color:'#533AB7', bg:'#EEEDFE', bar:'#533AB7'},
-  {id:'control',   name:'Control interno',        full:'Control interno',                       icon:'🔒', color:'#993556', bg:'#FBEAF0', bar:'#993556'},
+  {id:'nia',           name:'Normas NIA-ES',          full:'Normas de Auditoría (NIA-ES)',                   icon:'📖', color:'#185FA5', bg:'#E6F1FB', bar:'#185FA5'},
+  {id:'independencia', name:'Independencia',           full:'Independencia y ética profesional',              icon:'🛡️', color:'#0F6E56', bg:'#E1F5EE', bar:'#0F6E56'},
+  {id:'informes',      name:'Informes',                full:'Informes de auditoría',                          icon:'📄', color:'#BA7517', bg:'#FAEEDA', bar:'#BA7517'},
+  {id:'planificacion', name:'Planificación',            full:'Planificación y procedimientos',                 icon:'📋', color:'#533AB7', bg:'#EEEDFE', bar:'#533AB7'},
+  {id:'control',       name:'Control interno',         full:'Control interno',                                icon:'🔒', color:'#993556', bg:'#FBEAF0', bar:'#993556'},
+  {id:'calidad',       name:'Control de calidad',      full:'Control de calidad (NIGC 1, NIGC 2, NIA-ES 220)', icon:'🏅', color:'#0B7A4E', bg:'#E6F8F2', bar:'#0B7A4E'},
 ];
 
 const VARIANTES = [
@@ -704,7 +705,8 @@ function startCreative(type){
 // ══════════════════════════════════════════════════
 const API = '/api/claude';
 const SYS_ROAC = `Eres preparador experto del examen ROAC español (Registro Oficial de Auditores de Cuentas).
-Dominas profundamente: NIA-ES 200-810, LAC 22/2015, TRLAC RDL 1/2011, Resoluciones ICAC, Normas Éticas ICJCE, Reglamento UE 537/2014.
+Dominas profundamente: NIA-ES 200-810, NIGC 1 (ISQM 1), NIGC 2 (ISQM 2), NIA-ES 220 (revisada), LAC 22/2015, TRLAC RDL 1/2011, Resoluciones ICAC, Normas Éticas ICJCE, Reglamento UE 537/2014.
+Para el bloque de Control de Calidad dominas: sistemas de gestión de calidad de la firma, revisión de control de calidad del encargo (EQCR/RCCE), responsabilidades del socio del encargo (NIA-ES 220), seguimiento del sistema de calidad, roles del responsable de control de calidad, riesgos asociados al control de calidad, y requisitos para entidades de interés público.
 Generas preguntas originales, rigurosas, variadas, en el lenguaje técnico exacto del examen ROAC.
 Respondes SIEMPRE con JSON puro. Sin backticks, sin markdown, sin texto antes ni después del JSON.`;
 

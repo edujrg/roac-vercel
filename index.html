@@ -833,6 +833,73 @@ Responde su duda de forma directa, técnica y concisa (máx 4 frases). Menciona 
   msgs.scrollTop = msgs.scrollHeight;
 }
 
+
+// ── ENLACES NORMATIVOS ──
+const NORM_LINKS = {
+  'LAC 22/2015':    'https://www.boe.es/buscar/act.php?id=BOE-A-2015-8685',
+  'TRLAC':          'https://www.boe.es/buscar/act.php?id=BOE-A-2011-1037',
+  'RDL 1/2011':     'https://www.boe.es/buscar/act.php?id=BOE-A-2011-1037',
+  'Reglamento 537': 'https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32014R0537',
+  'UE 537/2014':    'https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32014R0537',
+  'NIA-ES 200':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 210':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 220':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 230':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 240':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 250':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 260':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 265':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 300':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 315':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 320':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 330':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 402':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 450':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 500':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 501':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 505':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 510':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 520':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 530':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 540':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 550':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 560':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 570':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 580':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 600':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 610':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 620':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 700':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 701':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 705':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 706':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 710':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 720':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 800':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 805':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIA-ES 810':     'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nia-es',
+  'NIGC 1':         'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nigc',
+  'NIGC 2':         'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nigc',
+  'ISQM':           'https://www.icac.gob.es/normativa-y-publicaciones/normativa/normas-de-auditoria/nigc',
+};
+
+function linkifyRef(refText){
+  if(!refText) return '';
+  let result = refText;
+  // Ordenar por longitud descendente para que matches más específicos ganen
+  const keys = Object.keys(NORM_LINKS).sort((a,b)=>b.length-a.length);
+  keys.forEach(key => {
+    if(result.includes(key)){
+      const url = NORM_LINKS[key];
+      result = result.replace(
+        new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+        `<a href="${url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">${key}</a>`
+      );
+    }
+  });
+  return result;
+}
+
 // ── APRENDIZAJE ADAPTATIVO ──
 function getWeakestTopic(){
   // Devuelve el tema con peor ratio de aciertos (mínimo 3 intentos)
@@ -981,7 +1048,7 @@ function confirmTest(q){
   recordResult(ok, window._q?.pregunta);
   const qCtx = `Pregunta: ${q.pregunta||q.caso||''}\nExplicación: ${q.explicacion||q.respuesta_modelo||''}\nNormativa: ${q.referencia||q.normativa||''}`;
   let h = `<div class="fb-panel"><div class="fb-result"><div class="fb-icon">${ok?'✅':'❌'}</div><span class="fb-label ${ok?'ok':'ko'}">${ok?'¡Correcto!':'Incorrecto'}</span></div><div class="fb-text">${q.explicacion}</div>`;
-  if(q.referencia) h += `<div class="fb-ref">📖 ${q.referencia}</div>`;
+  if(q.referencia) h += `<div class="fb-ref">📖 ${linkifyRef(q.referencia)}</div>`;
   h += renderDoubtChat(qCtx) + `</div>`;
   document.getElementById('fb-area').innerHTML = h;
   document.getElementById('ex-btn').textContent = 'Siguiente pregunta →';

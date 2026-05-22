@@ -524,7 +524,12 @@ async function loadProgress() {
     const raw = localStorage.getItem('roac_progress');
     if(raw) {
       const d = JSON.parse(raw);
-      if(d.topicStats) S.topicStats = d.topicStats;
+      if(d.topicStats) {
+        // Merge: mantener bloques nuevos que no estén en los datos guardados
+        TOPICS.forEach(t => {
+          if(d.topicStats[t.id]) S.topicStats[t.id] = d.topicStats[t.id];
+        });
+      }
       if(d.sessionQ) S.sessionQ = d.sessionQ;
       if(d.sessionOk) S.sessionOk = d.sessionOk;
       if(d.modesLog) S.modesLog = d.modesLog;
@@ -540,7 +545,11 @@ async function loadProgress() {
     const rows = await r.json();
     if(rows?.length > 0) {
       const d = rows[0].data;
-      if(d.topicStats) S.topicStats = d.topicStats;
+      if(d.topicStats) {
+        TOPICS.forEach(t => {
+          if(d.topicStats[t.id]) S.topicStats[t.id] = d.topicStats[t.id];
+        });
+      }
       if(d.sessionQ) S.sessionQ = d.sessionQ;
       if(d.sessionOk) S.sessionOk = d.sessionOk;
       if(d.modesLog) S.modesLog = d.modesLog;

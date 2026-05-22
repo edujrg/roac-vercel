@@ -547,9 +547,11 @@ function go(id){
   if(id==='s-stats') renderStats();
 }
 
-function init(){
+async function init(){
   if(!getKey()){ go('s-setup'); return; }
   go('s-home');
+  await loadProgress();
+  renderHome();
 }
 
 function setTime(m, el){

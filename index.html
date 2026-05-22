@@ -447,38 +447,70 @@ const VARIANTES = [
 ];
 
 
-// ── PERSISTENCIA localStorage ──
-const SAVE_KEY = 'roac_progress';
+// ── PERSISTENCIA Supabase (multi-dispositivo) ──
+const SB_URL = 'https://posuihzngblupplnsipy.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvc3VpaHpuZ2JsdXBwbG5zaXB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0Nzg1NjAsImV4cCI6MjA5NTA1NDU2MH0.DMHZmDNzyXBpR4EWz22BPV1ktLABJ4hjF6LKyVWqfmE';
 
-function saveProgress() {
-  const data = {
-    topicStats: S.topicStats,
-    sessionQ: S.sessionQ,
-    sessionOk: S.sessionOk,
-    modesLog: S.modesLog,
-  };
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
+function getProgressId(){
+  const key = getKey();
+  if(!key) return null;
+  let hash = 0;
+  for(let i=0;i<key.length;i++) hash = ((hash<<5)-hash)+key.charCodeAt(i);
+  return 'user_' + Math.abs(hash).toString(36);
 }
 
-function loadProgress() {
+async function saveProgress() {
+  const id = getProgressId();
+  if(!id) return;
+  const data = { topicStats: S.topicStats, sessionQ: S.sessionQ, sessionOk: S.sessionOk, modesLog: S.modesLog.slice(-20) };
+  try { localStorage.setItem('roac_progress', JSON.stringify(data)); } catch(e) {}
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return;
-    const data = parseJSON(raw);
-    if (data.topicStats) S.topicStats = data.topicStats;
-    if (data.sessionQ) S.sessionQ = data.sessionQ;
-    if (data.sessionOk) S.sessionOk = data.sessionOk;
-    if (data.modesLog) S.modesLog = data.modesLog;
+    await fetch(`${SB_URL}/rest/v1/roac_progress`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ id, data, updated_at: new Date().toISOString() })
+    });
   } catch(e) {}
 }
 
-function resetProgress() {
-  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+async function loadProgress() {
+  try {
+    const raw = localStorage.getItem('roac_progress');
+    if(raw) {
+      const d = JSON.parse(raw);
+      if(d.topicStats) S.topicStats = d.topicStats;
+      if(d.sessionQ) S.sessionQ = d.sessionQ;
+      if(d.sessionOk) S.sessionOk = d.sessionOk;
+      if(d.modesLog) S.modesLog = d.modesLog;
+    }
+  } catch(e) {}
+  const id = getProgressId();
+  if(!id) return;
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/roac_progress?id=eq.${id}&select=data`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const rows = await r.json();
+    if(rows?.length > 0) {
+      const d = rows[0].data;
+      if(d.topicStats) S.topicStats = d.topicStats;
+      if(d.sessionQ) S.sessionQ = d.sessionQ;
+      if(d.sessionOk) S.sessionOk = d.sessionOk;
+      if(d.modesLog) S.modesLog = d.modesLog;
+      localStorage.setItem('roac_progress', JSON.stringify(d));
+      renderHome();
+    }
+  } catch(e) {}
+}
+
+async function resetProgress() {
+  const id = getProgressId();
   S.topicStats = Object.fromEntries(TOPICS.map(t=>[t.id,{correct:0,total:0}]));
   S.sessionQ = 0; S.sessionOk = 0; S.modesLog = [];
-  loadProgress();
-renderHome();
-  alert('Progreso reiniciado');
+  try { localStorage.removeItem('roac_progress'); } catch(e) {}
+  if(id) try { await fetch(`${SB_URL}/rest/v1/roac_progress?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }); } catch(e) {}
+  renderHome();
+  alert('Progreso reiniciado en todos los dispositivos');
 }
 
 let S = {

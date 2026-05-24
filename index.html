@@ -975,8 +975,9 @@ async function loadQ(){
 
   const prompts = {
     test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}${adaptCtx}
-Varía qué letra (A/B/C/D) es la correcta.
-JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":0,"explicacion":"Explicación técnica detallada.","referencia":"NIA-ES X, párrafo Y"}`,
+CRÍTICO: La respuesta correcta debe ser la opción número ${(S.qCount%4)} (0=A, 1=B, 2=C, 3=D). Rota estrictamente entre A, B, C y D según el número de pregunta. NUNCA pongas B como correcta dos veces seguidas.
+Las opciones incorrectas deben ser muy plausibles técnicamente — el tipo de error sutil que distingue a quien aprueba de quien suspende el ROAC. Evita opciones claramente absurdas.
+JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":${S.qCount%4},"explicacion":"Explicación técnica detallada de por qué cada opción es correcta o incorrecta.","referencia":"NIA-ES X, párrafo Y"}`,
 
     desarrollo: `Genera pregunta ${S.qCount} desarrollo ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}
 JSON: {"tipo":"desarrollo","normativa":"NIA-ES X / Art.Z LAC","pregunta":"...","respuesta_modelo":"Respuesta técnica completa.","puntos_clave":["p1","p2","p3","p4"],"referencia":"NIA-ES X, párrafo Y"}`,
@@ -1313,8 +1314,26 @@ async function initRoles(){
   document.getElementById('roles-tag').textContent=topic?.name||'—';
   addMsg('roles-chat','sys','Preparando escenario…');
   try {
-    const raw = await callAI(`Genera escenario juego de roles ROAC sobre "${topic?.full}". Alumno es auditor senior.
-JSON: {"empresa":"Nombre y sector","situacion":"Situación problemática concreta, 2 frases","primer_mensaje":"Mensaje inicial del director financiero al auditor, natural, 2-3 frases"}`);
+    const raw = await callAI(`Genera escenario de juego de roles ROAC sobre "${topic?.full}". El alumno es auditor senior. 
+IMPORTANTE: Elige ALEATORIAMENTE uno de estos tipos de situación (varía en cada llamada, no repitas el mismo):
+1. Director financiero presiona para modificar salvedades del informe
+2. Administrador único de empresa familiar oculta operaciones vinculadas
+3. Consejero delegado insiste en que la empresa no es empresa en funcionamiento
+4. Cliente solicita cambio de criterio contable justo antes de cerrar auditoría
+5. Directora financiera revela que hay contingencias fiscales no provisionadas
+6. Responsable de tesorería admite un error material en valoración de existencias
+7. Socio de la firma presiona al auditor para dar una opinión favorable a un cliente clave
+8. Entidad de interés público con deficiencias graves en control interno que la dirección minimiza
+9. Cliente con préstamos bancarios cuyo incumplimiento de covenants no está revelado
+10. Empresa con litigios significativos que la dirección no quiere divulgar en la memoria
+11. Auditor descubre indicios de fraude en filial extranjera
+12. Director financiero alega que un error de 800.000€ no es material para evitar salvedad
+13. Cliente que cambia de auditor justo cuando se detecta una irregularidad
+14. Empresa con going concern dudoso pero dirección se niega a incluir párrafo de énfasis
+15. Responsable financiero que entrega información incompleta y dilata los plazos
+
+Elige el número ${Math.floor(Math.random()*15)+1} de la lista o uno similar pero diferente a los anteriores.
+JSON: {"empresa":"Nombre real y sector específico","situacion":"Situación problemática concreta y enrevesada, 3 frases con detalles técnicos","tipo_interlocutor":"cargo exacto de quien habla con el auditor","primer_mensaje":"Mensaje inicial del interlocutor al auditor, natural y con detalles concretos, 3-4 frases"}\`);
     const sc = parseJSON(raw);
     window._sc = sc;
     document.querySelector('#roles-chat .msg.sys')?.remove();

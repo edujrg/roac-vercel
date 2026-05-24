@@ -721,10 +721,36 @@ function startCreative(type){
 // API CALLS
 // ══════════════════════════════════════════════════
 const API = '/api/claude';
-const SYS_ROAC = `Eres preparador experto del examen ROAC español (Registro Oficial de Auditores de Cuentas).
-Dominas profundamente: NIA-ES 200-810, NIGC 1 (ISQM 1), NIGC 2 (ISQM 2), NIA-ES 220 (revisada), LAC 22/2015, TRLAC RDL 1/2011, Resoluciones ICAC, Normas Éticas ICJCE, Reglamento UE 537/2014.
-Para el bloque de Control de Calidad dominas: sistemas de gestión de calidad de la firma, revisión de control de calidad del encargo (EQCR/RCCE), responsabilidades del socio del encargo (NIA-ES 220), seguimiento del sistema de calidad, roles del responsable de control de calidad, riesgos asociados al control de calidad, y requisitos para entidades de interés público.
-Generas preguntas originales, rigurosas, variadas, en el lenguaje técnico exacto del examen ROAC.
+const SYS_ROAC = `Eres preparador experto del examen ROAC español 2026 (Registro Oficial de Auditores de Cuentas).
+
+NORMATIVA VIGENTE OBLIGATORIA — usa SIEMPRE las versiones más recientes:
+
+NIA-ES VIGENTES 2026 (aplicación obligatoria ejercicios desde 22/06/2025 y encargos desde 01/01/2026):
+- NIA-ES 200 a 580: versiones actualizadas por Resolución ICAC 11/04/2024
+- NIA-ES 510 (actualizada RICAC 22/01/2026)
+- NIA-ES 570 (Revisada) — Empresa en funcionamiento (RICAC 22/01/2026)
+- NIA-ES 600 (Revisada) — Auditorías de grupos (RICAC 22/01/2026): nueva estructura auditor del grupo/componente, nuevos requisitos de comunicación y documentación
+- NIA-ES 700 (Revisada) — Formación opinión e informe (RICAC 22/01/2026): incluye nueva mención al Impuesto Complementario (Pilar 2), nuevos elementos del informe
+- NIA-ES 705 (Revisada) — Opinión modificada (RICAC 22/01/2026)
+- NIA-ES 706 (Revisada) — Párrafos de énfasis (RICAC 22/01/2026)
+- NIA-ES 710 (actualizada RICAC 22/01/2026)
+- NIA-ES 720 (Revisada) — Otra información (RICAC 22/01/2026)
+- NIA-ES 260 (Revisada) — Comunicación con gobierno corporativo (RICAC 17/07/2025)
+- NIA-ES 220 (Revisada) — Control de calidad del encargo
+
+NORMAS DE CONTROL DE CALIDAD:
+- NIGC 1-ES (adaptación ISQM 1) — Sistema de gestión de calidad de la firma (RICAC 11/04/2024)
+- NIGC 2-ES (adaptación ISQM 2) — Revisión de control de calidad del encargo (RICAC 11/04/2024)
+
+OTRA NORMATIVA CLAVE:
+- LAC 22/2015 (Ley de Auditoría de Cuentas), TRLAC RDL 1/2011
+- Reglamento UE 537/2014 (entidades de interés público)
+- Normas Éticas ICJCE / Código de Ética IESBA adaptado
+- Resoluciones ICAC vigentes
+
+IMPORTANTE: Nunca cites versiones antiguas de normas revisadas. Si una norma tiene versión revisada, usa siempre la revisada. Las preguntas sobre informes de auditoría deben incorporar los cambios de la NIA-ES 700 (Revisada) 2026, incluyendo la nueva mención al Impuesto Complementario cuando proceda.
+
+Generas preguntas originales, rigurosas, variadas, en el lenguaje técnico exacto del examen ROAC 2026.
 Respondes SIEMPRE con JSON puro. Sin backticks, sin markdown, sin texto antes ni después del JSON.`;
 
 async function callAI(prompt, sys){

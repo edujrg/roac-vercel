@@ -1324,36 +1324,35 @@ async function initRoles(){
   document.getElementById('roles-tag').textContent=topic?.name||'—';
   addMsg('roles-chat','sys','Preparando escenario…');
   try {
-    const raw = await callAI(`Genera escenario de juego de roles ROAC sobre "${topic?.full}". El alumno es auditor senior. 
-IMPORTANTE: Elige ALEATORIAMENTE uno de estos tipos de situación (varía en cada llamada, no repitas el mismo):
+    const raw = await callAI(`Genera escenario de juego de roles ROAC sobre "${topic?.full}". El alumno es auditor senior.
+IMPORTANTE: Elige ALEATORIAMENTE uno de estos 25 tipos de situación (varía en cada llamada):
 1. Director financiero presiona para modificar salvedades del informe
 2. Administrador único de empresa familiar oculta operaciones vinculadas
-3. Consejero delegado insiste en que la empresa no es empresa en funcionamiento
+3. Consejero delegado insiste en que la empresa no tiene problemas de empresa en funcionamiento
 4. Cliente solicita cambio de criterio contable justo antes de cerrar auditoría
-5. Directora financiera revela que hay contingencias fiscales no provisionadas
-6. Responsable de tesorería admite un error material en valoración de existencias
-7. Socio de la firma presiona al auditor para dar una opinión favorable a un cliente clave
+5. Directora financiera revela contingencias fiscales no provisionadas
+6. Responsable de tesorería admite error material en valoración de existencias
+7. Socio de la firma presiona al auditor para dar opinión favorable a cliente clave
 8. Entidad de interés público con deficiencias graves en control interno que la dirección minimiza
-9. Cliente con préstamos bancarios cuyo incumplimiento de covenants no está revelado
-10. Empresa con litigios significativos que la dirección no quiere divulgar en la memoria
+9. Cliente con préstamos bancarios con incumplimiento de covenants no revelado
+10. Empresa con litigios significativos que la dirección no quiere divulgar en memoria
 11. Auditor descubre indicios de fraude en filial extranjera
-12. Director financiero alega que un error de 800.000€ no es material para evitar salvedad
+12. Director financiero alega que error de 800.000 euros no es material para evitar salvedad
 13. Cliente que cambia de auditor justo cuando se detecta una irregularidad
-14. Empresa con going concern dudoso pero dirección se niega a incluir párrafo de énfasis
-15. Responsable financiero que entrega información incompleta y dilata los plazos
+14. Empresa con going concern dudoso pero dirección rechaza incluir párrafo de énfasis
+15. Responsable financiero entrega información incompleta y dilata los plazos
 16. Cliente furioso que amenaza con cambiar de firma si no se retira una salvedad por limitación al alcance
 17. Director general que exige que el auditor no hable directamente con el comité de auditoría
 18. Empresa con deterioro evidente de fondo de comercio que la dirección se niega a reconocer
 19. Cliente que presenta documentación falsificada para justificar existencias inexistentes
 20. Administrador que admite haber dado avales personales a la empresa sin revelarlos en cuentas
-21. Director financiero que intenta sobornar sutilmente al auditor con "atenciones" durante el encargo
+21. Director financiero que intenta sobornar sutilmente al auditor con atenciones durante el encargo
 22. Empresa con pérdidas ocultas en filiales offshore que aparecen en la consolidación
-23. Cliente que alega que una NIA-ES concreta "no aplica a su sector" para evitar un procedimiento
+23. Cliente que alega que una NIA-ES concreta no aplica a su sector para evitar un procedimiento
 24. Socio comanditario que exige al auditor un informe favorable bajo amenaza legal
 25. Empresa cotizada con hechos posteriores al cierre que la dirección no quiere divulgar
-
-Elige ALEATORIAMENTE uno de los 25 tipos anteriores. Varía en cada llamada — nunca repitas el mismo escenario dos veces consecutivas.
-JSON: {"empresa":"Nombre real y sector específico","situacion":"Situación problemática concreta y enrevesada, 3 frases con detalles técnicos","tipo_interlocutor":"cargo exacto de quien habla con el auditor","primer_mensaje":"Mensaje inicial del interlocutor al auditor, natural y con detalles concretos, 3-4 frases"}\`);
+Elige aleatoriamente uno. Nunca repitas el mismo dos veces seguidas.
+JSON: {"empresa":"Nombre real y sector específico","situacion":"Situación concreta y enrevesada con detalles técnicos, 3 frases","tipo_interlocutor":"cargo exacto","primer_mensaje":"Mensaje inicial natural con detalles concretos, 3-4 frases"}` );
     const sc = parseJSON(raw);
     window._sc = sc;
     document.querySelector('#roles-chat .msg.sys')?.remove();

@@ -975,9 +975,11 @@ async function loadQ(){
 
   const prompts = {
     test: `Genera pregunta ${S.qCount} opción múltiple ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}${adaptCtx}
-CRÍTICO: La respuesta correcta debe ser la opción número ${(S.qCount%4)} (0=A, 1=B, 2=C, 3=D). Rota estrictamente entre A, B, C y D según el número de pregunta. NUNCA pongas B como correcta dos veces seguidas.
-Las opciones incorrectas deben ser muy plausibles técnicamente — el tipo de error sutil que distingue a quien aprueba de quien suspende el ROAC. Evita opciones claramente absurdas.
-JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":${S.qCount%4},"explicacion":"Explicación técnica detallada de por qué cada opción es correcta o incorrecta.","referencia":"NIA-ES X, párrafo Y"}`,
+CRÍTICO sobre las opciones:
+- Elige ALEATORIAMENTE qué letra es la correcta (A, B, C o D). No sigas ningún patrón predecible. No repitas la misma letra más de una vez seguida.
+- Las 3 opciones incorrectas deben ser técnicamente muy plausibles — redactadas con terminología normativa real, con errores sutiles de matiz, plazo, umbral o referencia. El tipo de trampa que distingue al aprobado del suspenso en el ROAC.
+- Nunca incluyas opciones absurdas o claramente incorrectas.
+JSON: {"tipo":"test","normativa":"NIA-ES X pár.Y / Art.Z LAC 22/2015","pregunta":"...","opciones":["A) ...","B) ...","C) ...","D) ..."],"correcta":0,"explicacion":"Explica por qué cada opción es correcta o incorrecta, con referencia normativa exacta.","referencia":"NIA-ES X, párrafo Y"}`,
 
     desarrollo: `Genera pregunta ${S.qCount} desarrollo ROAC sobre "${topic?.full}", enfoque: ${v}. ${timeInstr}
 JSON: {"tipo":"desarrollo","normativa":"NIA-ES X / Art.Z LAC","pregunta":"...","respuesta_modelo":"Respuesta técnica completa.","puntos_clave":["p1","p2","p3","p4"],"referencia":"NIA-ES X, párrafo Y"}`,
@@ -1331,8 +1333,18 @@ IMPORTANTE: Elige ALEATORIAMENTE uno de estos tipos de situación (varía en cad
 13. Cliente que cambia de auditor justo cuando se detecta una irregularidad
 14. Empresa con going concern dudoso pero dirección se niega a incluir párrafo de énfasis
 15. Responsable financiero que entrega información incompleta y dilata los plazos
+16. Cliente furioso que amenaza con cambiar de firma si no se retira una salvedad por limitación al alcance
+17. Director general que exige que el auditor no hable directamente con el comité de auditoría
+18. Empresa con deterioro evidente de fondo de comercio que la dirección se niega a reconocer
+19. Cliente que presenta documentación falsificada para justificar existencias inexistentes
+20. Administrador que admite haber dado avales personales a la empresa sin revelarlos en cuentas
+21. Director financiero que intenta sobornar sutilmente al auditor con "atenciones" durante el encargo
+22. Empresa con pérdidas ocultas en filiales offshore que aparecen en la consolidación
+23. Cliente que alega que una NIA-ES concreta "no aplica a su sector" para evitar un procedimiento
+24. Socio comanditario que exige al auditor un informe favorable bajo amenaza legal
+25. Empresa cotizada con hechos posteriores al cierre que la dirección no quiere divulgar
 
-Elige el número ${Math.floor(Math.random()*15)+1} de la lista o uno similar pero diferente a los anteriores.
+Elige ALEATORIAMENTE uno de los 25 tipos anteriores. Varía en cada llamada — nunca repitas el mismo escenario dos veces consecutivas.
 JSON: {"empresa":"Nombre real y sector específico","situacion":"Situación problemática concreta y enrevesada, 3 frases con detalles técnicos","tipo_interlocutor":"cargo exacto de quien habla con el auditor","primer_mensaje":"Mensaje inicial del interlocutor al auditor, natural y con detalles concretos, 3-4 frases"}\`);
     const sc = parseJSON(raw);
     window._sc = sc;

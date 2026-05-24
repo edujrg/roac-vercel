@@ -561,13 +561,15 @@ async function loadProgress() {
 }
 
 async function resetProgress() {
+  if(!confirm('¿Borrar todo el progreso? La clave API no se toca.')) return;
   const id = getProgressId();
   S.topicStats = Object.fromEntries(TOPICS.map(t=>[t.id,{correct:0,total:0}]));
-  S.sessionQ = 0; S.sessionOk = 0; S.modesLog = [];
+  S.sessionQ = 0; S.sessionOk = 0; S.modesLog = []; S.weakPoints = {};
+  // NUNCA borrar la clave API
   try { localStorage.removeItem('roac_progress'); } catch(e) {}
   if(id) try { await fetch(`${SB_URL}/rest/v1/roac_progress?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }); } catch(e) {}
   renderHome();
-  alert('Progreso reiniciado en todos los dispositivos');
+  alert('Progreso reiniciado. La clave API sigue guardada.');
 }
 
 let S = {
@@ -592,7 +594,13 @@ function saveKey(){
   const k = document.getElementById('api-key-input').value.trim();
   if(!k) return;
   localStorage.setItem('roac_api_key', k);
+  // Asegurar que existe un UID
+  if(!localStorage.getItem('roac_uid')){
+    const uid = 'user_' + Math.random().toString(36).substring(2,10) + Date.now().toString(36);
+    localStorage.setItem('roac_uid', uid);
+  }
   go('s-home');
+  loadProgress();
 }
 
 function showSetupPanel(){
